@@ -1,4 +1,4 @@
-package com.geovaninieswald.meusgastos;
+package com.geovaninieswald.meusgastos.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.geovaninieswald.meusgastos.R;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -40,9 +42,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        Intent intent = new Intent(MainActivity.this, InicialActivity.class);
-        startActivity(intent);
     }
 
     @Override

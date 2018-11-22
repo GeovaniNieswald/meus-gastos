@@ -13,10 +13,8 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.Fullscreen">
-        <item name="android:windowFullscreen">true</item>
-        <item name="colorPrimaryDark">@android:color/white</item>
-        <item name="colorPrimary">@android:color/white</item>
+    <style name="AppTheme.Launcher">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
