@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "894838745625",
+    "firebase_url": "https://meus-gastos-f439c.firebaseio.com",
+    "project_id": "meus-gastos-f439c",
+    "storage_bucket": "meus-gastos-f439c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:894838745625:android:c710f897eb9eee82",
+        "android_client_info": {
+          "package_name": "com.geovaninieswald.meusgastos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "894838745625-639o97kmf60jc0fpoulg7k7manjf2hqi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.geovaninieswald.meusgastos",
+            "certificate_hash": "e0fc5926984c1d396d615b21e5e9f3f75283be7a"
+          }
+        },
+        {
+          "client_id": "894838745625-5of1ot8t6phl15b3gh7lk9lmd6devk0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBm1KV6JHLFsJVYQqqDQB5qcOC6KenpjRs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "894838745625-5of1ot8t6phl15b3gh7lk9lmd6devk0c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

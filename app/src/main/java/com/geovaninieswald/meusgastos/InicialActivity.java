@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class LoginActivity extends Activity implements View.OnClickListener {
+public class InicialActivity extends Activity implements View.OnClickListener {
 
     private Button btLoginGoogle;
     private Button btLoginFacebook;
@@ -15,7 +15,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_inicial);
 
         btLoginGoogle = findViewById(R.id.loginGoogleID);
         btLoginFacebook = findViewById(R.id.loginFaceID);
@@ -32,15 +32,15 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
         switch (v.getId()){
             case R.id.loginGoogleID:
-                intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent = new Intent(InicialActivity.this, MainActivity.class);
                 startActivity(intent);
                 break;
             case R.id.loginFaceID:
-                intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent = new Intent(InicialActivity.this, MainActivity.class);
                 startActivity(intent);
                 break;
             case R.id.loginEmailID:
-                intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent = new Intent(InicialActivity.this, MainActivity.class);
                 startActivity(intent);
                 break;
         }
