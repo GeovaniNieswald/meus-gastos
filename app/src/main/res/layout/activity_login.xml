@@ -2,11 +2,14 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/containerPrincipal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/backgorund_login"
     tools:context=".LoginActivity">
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/containerCentral"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -15,49 +18,68 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/nomeAppID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Meus Gastos"
-            android:textSize="30sp"
+            android:text="@string/app_name"
+            android:textAlignment="center"
+            android:textColor="@android:color/background_dark"
+            android:textSize="36sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/loginGoogleID"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:text="Fazer login com o Google"
+            android:background="@android:color/background_light"
+            android:drawableLeft="@drawable/ic_google"
+            android:paddingLeft="20dp"
+            android:paddingRight="50dp"
+            android:text="@string/login_google"
+            android:textAlignment="viewEnd"
             android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+            app:layout_constraintTop_toBottomOf="@+id/nomeAppID" />
 
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/loginFaceID"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:text="Fazer login com o Facebook"
+            android:background="#3B5998"
+            android:drawableLeft="@drawable/ic_google"
+            android:paddingLeft="20dp"
+            android:paddingRight="50dp"
+            android:text="@string/login_facebook"
+            android:textAlignment="viewEnd"
             android:textAllCaps="false"
+            android:textColor="@android:color/background_light"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button" />
+            app:layout_constraintTop_toBottomOf="@+id/loginGoogleID" />
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/loginEmailID"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:text="Fazer login com e-mail"
+            android:background="@color/colorPrimaryDark"
+            android:drawableLeft="@drawable/ic_google"
+            android:paddingLeft="20dp"
+            android:paddingRight="50dp"
+            android:text="@string/login_email"
+            android:textAlignment="viewEnd"
             android:textAllCaps="false"
+            android:textColor="@android:color/background_light"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button2" />
+            app:layout_constraintTop_toBottomOf="@+id/loginFaceID" />
     </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>
