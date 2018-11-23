@@ -1,0 +1,115 @@
+package com.geovaninieswald.meusgastos.activity;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.geovaninieswald.meusgastos.R;
+import com.geovaninieswald.meusgastos.helper.Base64Custom;
+import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
+import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
+import com.geovaninieswald.meusgastos.model.Usuario;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.FirebaseUser;
+
+public class CadastroActivity extends Activity {
+
+    private TextView tvImagem;
+    private EditText edtNome, edtEmail, edtSenha, edtConfirmarSenha;
+    private Button btnCadastrar;
+    private FirebaseAuth auth;
+    private Usuario user;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_cadastro);
+
+        tvImagem = findViewById(R.id.imagemID);
+        edtNome = findViewById(R.id.nomeID);
+        edtEmail = findViewById(R.id.emailID);
+        edtSenha = findViewById(R.id.senhaID);
+        edtConfirmarSenha = findViewById(R.id.confirmarSenhaID);
+        btnCadastrar = findViewById(R.id.cadastrarID);
+
+        btnCadastrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String nome = edtNome.getText().toString();
+                String imagem = tvImagem.getText().toString();
+                String email = edtEmail.getText().toString();
+                String senha = edtSenha.getText().toString();
+                String confirmarSenha = edtConfirmarSenha.getText().toString();
+
+                if (nome.trim().isEmpty() || imagem.trim().isEmpty() || email.trim().isEmpty() || senha.trim().isEmpty() || confirmarSenha.trim().isEmpty()) {
+                    alerta("Insira todos os dados");
+                } else {
+                    if (senha.equals(confirmarSenha)) {
+                        user = new Usuario(Base64Custom.codificar(email), nome, imagem, email, senha);
+                        cadastrarUsuario();
+                    } else {
+                        alerta("Senhas informadas não correspondem");
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        auth = ConexaoFirebase.getFirebaseAuth();
+    }
+
+    private void cadastrarUsuario() {
+        auth.createUserWithEmailAndPassword(user.getEmail(), user.getSenha()).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    alerta("Usuário cadastrado com sucesso");
+
+                    //FirebaseUser usuarioFirebase = task.getResult().getUser();
+                    user.salvar();
+
+                    SharedFirebasePreferences sfp = new SharedFirebasePreferences(CadastroActivity.this);
+                    sfp.salvarUsuario(user.getId());
+
+                    startActivity(new Intent(CadastroActivity.this, MainActivity.class));
+                    finish();
+                } else {
+                    String erro = "";
+
+                    try {
+                        throw task.getException();
+                    } catch (FirebaseAuthWeakPasswordException e) {
+                        erro = "Senha muito fraca";
+                    } catch (FirebaseAuthInvalidCredentialsException e) {
+                        erro = "O e-mail digitado é inválido";
+                    } catch (FirebaseAuthUserCollisionException e) {
+                        erro = "Esse e-mail já está cadastrado";
+                    } catch (Exception e) {
+                        erro = "Erro ao cadastrar";
+                    }
+
+                    alerta(erro);
+                }
+            }
+        });
+    }
+
+    private void alerta(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+}

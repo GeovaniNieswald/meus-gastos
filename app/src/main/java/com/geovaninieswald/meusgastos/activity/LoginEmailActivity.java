@@ -38,18 +38,22 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-
-        // Verificar se campos estão preenchidos
-        String email = edtEmail.getText().toString();
-        String senha = edtSenha.getText().toString();
-
         switch (v.getId()) {
             case R.id.loginID:
-                login(email, senha);
+                String email = edtEmail.getText().toString();
+                String senha = edtSenha.getText().toString();
+
+                if (email.trim().isEmpty() || senha.trim().isEmpty()) {
+                    alerta("Você deve informar um e-mail e senha");
+                } else {
+                    login(email, senha);
+                }
+
                 break;
             case R.id.novoID:
-                criarUsuario(email, senha);
-                break;
+                Intent intent = new Intent(LoginEmailActivity.this, CadastroActivity.class);
+                startActivity(intent);
+                finish();
         }
     }
 
@@ -64,28 +68,10 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Intent intent = new Intent(LoginEmailActivity.this, MainActivity.class);
-                    startActivity(intent);
+                    startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
                     finish();
                 } else {
                     alerta("Erro ao logar");
-                }
-            }
-        });
-    }
-
-    private void criarUsuario(String email, String senha) {
-        auth.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(LoginEmailActivity.this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    alerta("Usuário cadastrado com sucesso");
-
-                    Intent intent = new Intent(LoginEmailActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    alerta("Erro ao cadastrar");
                 }
             }
         });

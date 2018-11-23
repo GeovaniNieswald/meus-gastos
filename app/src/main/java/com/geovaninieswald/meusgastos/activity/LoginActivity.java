@@ -7,18 +7,28 @@ import android.view.View;
 import android.widget.Button;
 
 import com.geovaninieswald.meusgastos.R;
+import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 
 public class LoginActivity extends Activity implements View.OnClickListener {
 
     private Button btnLoginGoogle;
     private Button btnLoginFacebook;
     private Button btnLoginEmail;
+    private SharedFirebasePreferences sfp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        sfp = new SharedFirebasePreferences(LoginActivity.this);
+
+        if(sfp.verificarLogin()){
+            //busca dados locais e att servidor
+            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            finish();
+        }
 
         btnLoginGoogle = findViewById(R.id.loginGoogleID);
         btnLoginFacebook = findViewById(R.id.loginFaceID);
@@ -31,24 +41,16 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        Intent intent;
-
         switch (v.getId()) {
             case R.id.loginGoogleID:
-                intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+                // implementar login com goole
                 break;
             case R.id.loginFaceID:
-                intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+                // implementar login com facebook
                 break;
             case R.id.loginEmailID:
-                intent = new Intent(LoginActivity.this, LoginEmailActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(LoginActivity.this, LoginEmailActivity.class));
                 finish();
-                break;
         }
     }
 }
