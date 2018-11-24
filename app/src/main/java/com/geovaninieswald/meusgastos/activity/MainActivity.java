@@ -20,14 +20,14 @@ import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private SharedFirebasePreferences sfp;
+    private SharedFirebasePreferences preferencias;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sfp = new SharedFirebasePreferences(MainActivity.this);
+        preferencias = new SharedFirebasePreferences(MainActivity.this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
-            sfp.sair();
+            preferencias.sair();
             ConexaoFirebase.sair();
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();

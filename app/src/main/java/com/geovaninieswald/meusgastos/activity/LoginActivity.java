@@ -21,7 +21,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.geovaninieswald.meusgastos.R;
-import com.geovaninieswald.meusgastos.helper.Base64Custom;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
@@ -48,12 +47,14 @@ import java.util.Arrays;
 public class LoginActivity extends Activity implements View.OnClickListener {
 
     private Button btnLoginGoogle, btnLoginFacebook, btnLoginEmail;
-    private SharedFirebasePreferences sfp;
+
+    private SharedFirebasePreferences preferencias;
     private GoogleSignInClient mGoogleSignInClient;
-    private FirebaseAuth auth;
-    private final int RC_SIGN_IN = 101;
-    private Usuario user;
     private CallbackManager callbackManager;
+    private FirebaseAuth autenticacao;
+    private Usuario usuario;
+
+    private final int RC_SIGN_IN = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +62,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        sfp = new SharedFirebasePreferences(LoginActivity.this);
+        preferencias = new SharedFirebasePreferences(LoginActivity.this);
 
-        if (sfp.verificarLogin()) {
+        if (preferencias.verificarLogin()) {
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         }
@@ -79,17 +80,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
         callbackManager = CallbackManager.Factory.create();
 
-
-        // Trecho de código para pegar a KeyHash
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo("com.facebook.samples.loginhowto", PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-            }
-        } catch (PackageManager.NameNotFoundException | NoSuchAlgorithmException e) {
-        }
+        keyHash(); //Remover depois
 
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -121,22 +112,20 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.loginGoogleID:
-                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+                startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
                 break;
             case R.id.loginFaceID:
                 LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile"));
                 break;
             case R.id.loginEmailID:
                 startActivity(new Intent(LoginActivity.this, LoginEmailActivity.class));
-                finish();
         }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        auth = ConexaoFirebase.getFirebaseAuth();
+        autenticacao = ConexaoFirebase.getFirebaseAuth();
     }
 
     @Override
@@ -145,9 +134,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+
             try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account);
+                firebaseAuthWithGoogle(task.getResult(ApiException.class));
             } catch (ApiException e) {
                 alerta("Erro ao fazer login");
             }
@@ -157,53 +146,60 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        auth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                login(task);
-            }
-        });
+        login(GoogleAuthProvider.getCredential(acct.getIdToken(), null));
     }
 
     private void firebaseAuthWithGoogleFacebook(AccessToken token) {
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        auth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                login(task);
-            }
-        });
+        login(FacebookAuthProvider.getCredential(token.getToken()));
     }
 
-    private void login(Task<AuthResult> task) {
-        if (task.isSuccessful()) {
-            FirebaseUser userFirebase = auth.getCurrentUser();
+    private void login(AuthCredential credential) {
+        autenticacao.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    FirebaseUser usuarioFirebase = autenticacao.getCurrentUser();
 
-            user = new Usuario(userFirebase.getDisplayName(), userFirebase.getPhotoUrl().toString(), userFirebase.getEmail());
-            UsuarioDAO.salvar(user);
+                    usuario = new Usuario(usuarioFirebase.getDisplayName(), usuarioFirebase.getPhotoUrl().toString(), usuarioFirebase.getEmail());
+                    usuario.setId(usuarioFirebase.getUid());
 
-            SharedFirebasePreferences sfp = new SharedFirebasePreferences(LoginActivity.this);
-            sfp.salvarLogin(Base64Custom.codificar(user.getEmail()));
+                    preferencias.salvarLogin(usuario.getId());
 
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-            finish();
-        } else {
-            String erro = "";
+                    UsuarioDAO dao = new UsuarioDAO(LoginActivity.this);
+                    dao.salvar(usuario);
 
-            try {
-                throw task.getException();
-            } catch (FirebaseAuthUserCollisionException e) {
-                erro = "Este e-mail está cadastrado como uma conta google";
-            } catch (Exception e) {
-                erro = "Erro ao fazer login";
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    finish();
+                } else {
+                    String erro = "";
+
+                    try {
+                        throw task.getException();
+                    } catch (FirebaseAuthUserCollisionException e) {
+                        erro = "Este e-mail está cadastrado como uma conta google";
+                    } catch (Exception e) {
+                        erro = "Erro ao fazer login";
+                    }
+
+                    alerta(erro);
+                }
             }
-
-            alerta(erro);
-        }
+        });
     }
 
     private void alerta(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    private void keyHash() {
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo("com.geovaninieswald.meusgastos", PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException | NoSuchAlgorithmException e) {
+        }
     }
 }

@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
-import com.geovaninieswald.meusgastos.helper.Base64Custom;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -22,12 +21,16 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
     private EditText edtEmail, edtSenha;
     private Button btnLogin, btnNovo;
-    private FirebaseAuth auth;
+
+    private FirebaseAuth autenticacao;
+    SharedFirebasePreferences preferencias;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_email);
+
+        preferencias = new SharedFirebasePreferences(LoginEmailActivity.this);
 
         edtEmail = findViewById(R.id.emailID);
         edtSenha = findViewById(R.id.senhaID);
@@ -61,16 +64,15 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
     @Override
     protected void onStart() {
         super.onStart();
-        auth = ConexaoFirebase.getFirebaseAuth();
+        autenticacao = ConexaoFirebase.getFirebaseAuth();
     }
 
     private void login(final String email, String senha) {
-        auth.signInWithEmailAndPassword(email, senha).addOnCompleteListener(LoginEmailActivity.this, new OnCompleteListener<AuthResult>() {
+        autenticacao.signInWithEmailAndPassword(email, senha).addOnCompleteListener(LoginEmailActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    SharedFirebasePreferences sfp = new SharedFirebasePreferences(LoginEmailActivity.this);
-                    sfp.salvarLogin(Base64Custom.codificar(email));
+                    preferencias.salvarLogin(autenticacao.getCurrentUser().getUid());
 
                     startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
                     finish();

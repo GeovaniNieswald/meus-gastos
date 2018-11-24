@@ -1,6 +1,6 @@
 package com.geovaninieswald.meusgastos.model;
 
-import com.geovaninieswald.meusgastos.helper.Base64Custom;
+import com.google.firebase.database.Exclude;
 
 public class Usuario {
 
@@ -9,13 +9,16 @@ public class Usuario {
     private String imagem;
     private String email;
 
+    public Usuario() {
+    }
+
     public Usuario(String nome, String imagem, String email) {
-        this.id = Base64Custom.codificar(email);
         this.nome = nome;
         this.imagem = imagem;
         this.email = email;
     }
 
+    @Exclude
     public String getId() {
         return id;
     }

@@ -28,13 +28,17 @@ public class CadastroActivity extends Activity {
     private TextView tvImagem;
     private EditText edtNome, edtEmail, edtSenha, edtConfirmarSenha;
     private Button btnCadastrar;
-    private FirebaseAuth auth;
-    private Usuario user;
+
+    private FirebaseAuth autenticacao;
+    private SharedFirebasePreferences preferencias;
+    private Usuario usuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
+
+        preferencias = new SharedFirebasePreferences(CadastroActivity.this);
 
         tvImagem = findViewById(R.id.imagemID);
         edtNome = findViewById(R.id.nomeID);
@@ -56,7 +60,7 @@ public class CadastroActivity extends Activity {
                     alerta("Insira todos os dados");
                 } else {
                     if (senha.equals(confirmarSenha)) {
-                        user = new Usuario(nome, imagem, email);
+                        usuario = new Usuario(nome, imagem, email);
                         cadastrarUsuario(email, senha);
                     } else {
                         alerta("Senhas informadas não correspondem");
@@ -69,20 +73,21 @@ public class CadastroActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        auth = ConexaoFirebase.getFirebaseAuth();
+        autenticacao = ConexaoFirebase.getFirebaseAuth();
     }
 
     private void cadastrarUsuario(String email, String senha) {
-        auth.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
+        autenticacao.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
+                    usuario.setId(autenticacao.getCurrentUser().getUid());
+                    preferencias.salvarLogin(usuario.getId());
+
+                    UsuarioDAO dao = new UsuarioDAO(CadastroActivity.this);
+                    dao.salvar(usuario);
+
                     alerta("Usuário cadastrado com sucesso");
-
-                    SharedFirebasePreferences sfp = new SharedFirebasePreferences(CadastroActivity.this);
-                    sfp.salvarLogin(user.getId());
-
-                    UsuarioDAO.salvar(user);
 
                     startActivity(new Intent(CadastroActivity.this, MainActivity.class));
                     finish();
