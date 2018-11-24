@@ -11,6 +11,7 @@ public class SharedFirebasePreferences {
     private SharedPreferences.Editor editor;
 
     private final String CHAVE_ID = "id";
+    private final String CHAVE_STATUS = "status";
 
     public SharedFirebasePreferences(Context context) {
         preferencias = context.getSharedPreferences(NOME_ARQUIVO, MODO);
@@ -22,8 +23,17 @@ public class SharedFirebasePreferences {
         editor.commit();
     }
 
+    public void salvarStatusSincronia(boolean status){
+        editor.putBoolean(CHAVE_STATUS, status);
+        editor.commit();
+    }
+
     public boolean verificarLogin() {
         return preferencias.contains("id");
+    }
+
+    public boolean verificarStatusSincronia(){
+        return preferencias.getBoolean(CHAVE_STATUS, false);
     }
 
     public void sair() {

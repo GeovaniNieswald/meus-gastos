@@ -166,7 +166,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                     preferencias.salvarLogin(usuario.getId());
 
                     UsuarioDAO dao = new UsuarioDAO(LoginActivity.this);
-                    dao.salvar(usuario);
+                    preferencias.salvarStatusSincronia(dao.salvar(usuario));
+
+                    // CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
 
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();

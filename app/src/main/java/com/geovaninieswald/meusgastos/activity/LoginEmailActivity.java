@@ -74,6 +74,8 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
                 if (task.isSuccessful()) {
                     preferencias.salvarLogin(autenticacao.getCurrentUser().getUid());
 
+                    // CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
+
                     startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
                     finish();
                 } else {

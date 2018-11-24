@@ -85,7 +85,7 @@ public class CadastroActivity extends Activity {
                     preferencias.salvarLogin(usuario.getId());
 
                     UsuarioDAO dao = new UsuarioDAO(CadastroActivity.this);
-                    dao.salvar(usuario);
+                    preferencias.salvarStatusSincronia(dao.salvar(usuario));
 
                     alerta("Usuário cadastrado com sucesso");
 

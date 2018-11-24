@@ -88,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        // ADICIONAR OPÇÃO SINCRONIZAR
+
         if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
@@ -99,6 +101,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
+
+            // VERIFICAR SE ESTÁ SINCRONIZADO, CASO NÃO AVISAR QUE O USUÁRIO PERDERÁ DADOS, CONFIRMAÇÃO EM AMBOS OS CASOS
+
             preferencias.sair();
             ConexaoFirebase.sair();
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
