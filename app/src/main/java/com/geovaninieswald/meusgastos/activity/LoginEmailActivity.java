@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
+import com.geovaninieswald.meusgastos.helper.Base64Custom;
+import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -53,7 +55,6 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
             case R.id.novoID:
                 Intent intent = new Intent(LoginEmailActivity.this, CadastroActivity.class);
                 startActivity(intent);
-                finish();
         }
     }
 
@@ -63,11 +64,14 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
         auth = ConexaoFirebase.getFirebaseAuth();
     }
 
-    private void login(String email, String senha) {
+    private void login(final String email, String senha) {
         auth.signInWithEmailAndPassword(email, senha).addOnCompleteListener(LoginEmailActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
+                    SharedFirebasePreferences sfp = new SharedFirebasePreferences(LoginEmailActivity.this);
+                    sfp.salvarLogin(Base64Custom.codificar(email));
+
                     startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
                     finish();
                 } else {

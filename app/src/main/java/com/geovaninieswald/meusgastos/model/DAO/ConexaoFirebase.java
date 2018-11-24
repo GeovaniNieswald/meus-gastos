@@ -24,6 +24,9 @@ public class ConexaoFirebase {
     }
 
     public static void sair() {
-        autenticacao.signOut();
+        try {
+            autenticacao.signOut();
+        } catch (Exception e) {
+        }
     }
 }

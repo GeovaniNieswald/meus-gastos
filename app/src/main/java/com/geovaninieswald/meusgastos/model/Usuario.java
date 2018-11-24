@@ -1,11 +1,6 @@
 package com.geovaninieswald.meusgastos.model;
 
-import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Exclude;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.geovaninieswald.meusgastos.helper.Base64Custom;
 
 public class Usuario {
 
@@ -13,35 +8,12 @@ public class Usuario {
     private String nome;
     private String imagem;
     private String email;
-    private String senha;
 
-    public Usuario() {
-    }
-
-    public Usuario(String id, String nome, String imagem, String email, String senha) {
-        this.id = id;
+    public Usuario(String nome, String imagem, String email) {
+        this.id = Base64Custom.codificar(email);
         this.nome = nome;
         this.imagem = imagem;
         this.email = email;
-        this.senha = senha;
-    }
-
-    public void salvar() {
-        DatabaseReference referencia = ConexaoFirebase.getFirebase();
-        referencia.child("usuario").child(String.valueOf(getId())).setValue(this);
-    }
-
-    @Exclude
-    public Map<String, Object> toMap() {
-        HashMap<String, Object> hashMapUsuario = new HashMap<>();
-
-        hashMapUsuario.put("id", getId());
-        hashMapUsuario.put("nome", getNome());
-        hashMapUsuario.put("imagem", getImagem());
-        hashMapUsuario.put("email", getEmail());
-        hashMapUsuario.put("senha", getSenha());
-
-        return hashMapUsuario;
     }
 
     public String getId() {
@@ -74,13 +46,5 @@ public class Usuario {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
     }
 }

@@ -11,9 +11,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
-import com.geovaninieswald.meusgastos.helper.Base64Custom;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
+import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
 import com.geovaninieswald.meusgastos.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -22,7 +22,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
-import com.google.firebase.auth.FirebaseUser;
 
 public class CadastroActivity extends Activity {
 
@@ -57,8 +56,8 @@ public class CadastroActivity extends Activity {
                     alerta("Insira todos os dados");
                 } else {
                     if (senha.equals(confirmarSenha)) {
-                        user = new Usuario(Base64Custom.codificar(email), nome, imagem, email, senha);
-                        cadastrarUsuario();
+                        user = new Usuario(nome, imagem, email);
+                        cadastrarUsuario(email, senha);
                     } else {
                         alerta("Senhas informadas não correspondem");
                     }
@@ -73,18 +72,17 @@ public class CadastroActivity extends Activity {
         auth = ConexaoFirebase.getFirebaseAuth();
     }
 
-    private void cadastrarUsuario() {
-        auth.createUserWithEmailAndPassword(user.getEmail(), user.getSenha()).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
+    private void cadastrarUsuario(String email, String senha) {
+        auth.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     alerta("Usuário cadastrado com sucesso");
 
-                    //FirebaseUser usuarioFirebase = task.getResult().getUser();
-                    user.salvar();
-
                     SharedFirebasePreferences sfp = new SharedFirebasePreferences(CadastroActivity.this);
-                    sfp.salvarUsuario(user.getId());
+                    sfp.salvarLogin(user.getId());
+
+                    UsuarioDAO.salvar(user);
 
                     startActivity(new Intent(CadastroActivity.this, MainActivity.class));
                     finish();
