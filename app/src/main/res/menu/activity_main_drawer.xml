@@ -5,33 +5,57 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:id="@+id/nav_transacoes"
+            android:icon="@drawable/ic_menu_transacoes"
+            android:title="Transações" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:id="@+id/nav_categorias"
+            android:icon="@drawable/ic_menu_categorias"
+            android:title="Categorias" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="Relatórios">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:id="@+id/nav_rel_redimentos"
+                android:icon="@drawable/ic_menu_rendimento"
+                android:title="Rendimentos" />
             <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:id="@+id/nav_rel_gastos"
+                android:icon="@drawable/ic_menu_gasto"
+                android:title="Gastos" />
+
+            <item
+                android:id="@+id/nav_rel_calendario"
+                android:icon="@drawable/ic_menu_calendario"
+                android:title="Calendário" />
+        </menu>
+    </item>
+
+    <item android:title="Comunicação">
+        <menu>
+            <item
+                android:id="@+id/nav_compartilhar"
+                android:icon="@drawable/ic_menu_compartilhar"
+                android:title="Compartilhar" />
+            <item
+                android:id="@+id/nav_avaliar"
+                android:icon="@drawable/ic_menu_avaliar"
+                android:title="Avaliar" />
+        </menu>
+    </item>
+
+    <item android:title="Outros">
+        <menu>
+            <item
+                android:id="@+id/nav_sobre"
+                android:icon="@drawable/ic_menu_sobre"
+                android:title="Sobre" />
+
+            <item
+                android:id="@+id/nav_sair"
+                android:icon="@drawable/ic_menu_sair"
+                android:title="Sair" />
         </menu>
     </item>
 

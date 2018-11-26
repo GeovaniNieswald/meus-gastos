@@ -88,54 +88,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
 
         // ADICIONAR OPÇÃO SINCRONIZAR
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        switch (item.getItemId()) {
+            case R.id.nav_transacoes:
+                break;
+            case R.id.nav_categorias:
+                break;
+            case R.id.nav_rel_redimentos:
+                break;
+            case R.id.nav_rel_gastos:
+                break;
+            case R.id.nav_rel_calendario:
+                break;
+            case R.id.nav_compartilhar:
+                break;
+            case R.id.nav_avaliar:
+                break;
+            case R.id.nav_sobre:
+                break;
+            case R.id.nav_sair:
+                // VERIFICAR SE ESTÁ SINCRONIZADO, CASO NÃO AVISAR QUE O USUÁRIO PERDERÁ DADOS, CONFIRMAÇÃO EM AMBOS OS CASOS
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-            // VERIFICAR SE ESTÁ SINCRONIZADO, CASO NÃO AVISAR QUE O USUÁRIO PERDERÁ DADOS, CONFIRMAÇÃO EM AMBOS OS CASOS
-
-            preferencias.sair();
-            ConexaoFirebase.sair();
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-            finish();
+                preferencias.sair();
+                ConexaoFirebase.sair();
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                finish();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
