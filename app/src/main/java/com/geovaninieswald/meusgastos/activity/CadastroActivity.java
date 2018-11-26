@@ -1,10 +1,16 @@
 package com.geovaninieswald.meusgastos.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +31,9 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.database.DatabaseReference;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 public class CadastroActivity extends Activity implements View.OnClickListener {
 
     private ImageView icone;
@@ -37,6 +46,10 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
     private Usuario usuario;
 
     private int controle;
+    private Bitmap bm;
+
+    private final int R_COD_GALERIA = 69;
+    private final int R_COD_CAMERA = 70;
 
     private final Handler HANDLER = new Handler();
     private final Runnable RUNNABLE = new Runnable() {
@@ -84,8 +97,59 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    private void selecionarImagem() {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode == R_COD_GALERIA) {
+            if (data != null) {
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                    salvarImagem(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (requestCode == R_COD_CAMERA) {
+            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+            salvarImagem(thumbnail);
+        }
+    }
+
+    private void selecionarImagem() {
+        AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
+        pictureDialog.setTitle("Selecione uma opção");
+        CharSequence[] pictureDialogItems = {"Selecione imagem da galeria", "Tire uma foto com a câmera"};
+        pictureDialog.setItems(pictureDialogItems, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    escolherGaleria();
+                } else if (which == 1) {
+                    escolherCamera();
+                }
+            }
+        });
+
+        pictureDialog.show();
+    }
+
+    private void escolherGaleria() {
+        Intent galeria = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galeria, R_COD_GALERIA);
+    }
+
+    private void escolherCamera() {
+        Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(camera, R_COD_CAMERA);
+    }
+
+    private void salvarImagem(Bitmap bitmap) {
+        this.bm = bitmap;
+
+        RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+        rbd.setCircular(true);
+        icone.setBackground(rbd);
     }
 
     private void cadastrarUsuario() {
