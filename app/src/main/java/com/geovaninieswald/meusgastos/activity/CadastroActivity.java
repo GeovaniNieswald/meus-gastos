@@ -3,11 +3,12 @@ package com.geovaninieswald.meusgastos.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
@@ -22,70 +23,112 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.database.DatabaseReference;
 
-public class CadastroActivity extends Activity {
+public class CadastroActivity extends Activity implements View.OnClickListener {
 
-    private TextView tvImagem;
+    private ImageView icone;
     private EditText edtNome, edtEmail, edtSenha, edtConfirmarSenha;
     private Button btnCadastrar;
 
     private FirebaseAuth autenticacao;
+    private DatabaseReference referencia;
     private SharedFirebasePreferences preferencias;
     private Usuario usuario;
+
+    private int controle;
+
+    private final Handler HANDLER = new Handler();
+    private final Runnable RUNNABLE = new Runnable() {
+        @Override
+        public void run() {
+            icone.setBackground(getDrawable(R.drawable.ic_cadastro));
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
 
+        referencia = ConexaoFirebase.getFirebase("usuarios");
         preferencias = new SharedFirebasePreferences(CadastroActivity.this);
 
-        tvImagem = findViewById(R.id.imagemID);
+        icone = findViewById(R.id.iconeID);
         edtNome = findViewById(R.id.nomeID);
         edtEmail = findViewById(R.id.emailID);
         edtSenha = findViewById(R.id.senhaID);
         edtConfirmarSenha = findViewById(R.id.confirmarSenhaID);
         btnCadastrar = findViewById(R.id.cadastrarID);
 
-        btnCadastrar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String nome = edtNome.getText().toString();
-                String imagem = tvImagem.getText().toString();
-                String email = edtEmail.getText().toString();
-                String senha = edtSenha.getText().toString();
-                String confirmarSenha = edtConfirmarSenha.getText().toString();
-
-                if (nome.trim().isEmpty() || imagem.trim().isEmpty() || email.trim().isEmpty() || senha.trim().isEmpty() || confirmarSenha.trim().isEmpty()) {
-                    alerta("Insira todos os dados");
-                } else {
-                    if (senha.equals(confirmarSenha)) {
-                        usuario = new Usuario(nome, imagem, email);
-                        cadastrarUsuario(email, senha);
-                    } else {
-                        alerta("Senhas informadas não correspondem");
-                    }
-                }
-            }
-        });
+        btnCadastrar.setOnClickListener(this);
+        icone.setOnClickListener(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        controle = 0;
+
         autenticacao = ConexaoFirebase.getFirebaseAuth();
     }
 
-    private void cadastrarUsuario(String email, String senha) {
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.cadastrarID:
+                cadastrarUsuario();
+                break;
+            case R.id.iconeID:
+                selecionarImagem();
+        }
+    }
+
+    private void selecionarImagem() {
+
+    }
+
+    private void cadastrarUsuario() {
+        String nome = edtNome.getText().toString();
+        String imagem = "";
+        String email = edtEmail.getText().toString();
+        String senha = edtSenha.getText().toString();
+        String confirmarSenha = edtConfirmarSenha.getText().toString();
+
+        if (nome.trim().isEmpty() || email.trim().isEmpty() || senha.trim().isEmpty() || confirmarSenha.trim().isEmpty()) {
+            alerta("Insira todos os dados");
+        } else {
+            if (senha.equals(confirmarSenha)) {
+                if (++controle == 1) {
+                    alerta("Você pode escolher uma imagem, basta tocar no icone");
+                    icone.setBackground(getDrawable(R.drawable.ic_cadastro_alerta));
+                    HANDLER.postDelayed(RUNNABLE, 4000);
+                } else {
+                    usuario = new Usuario(nome, imagem, email);
+                    firebaseAuthWithEmailAndPassword(email, senha);
+                }
+            } else {
+                alerta("Senhas informadas não correspondem");
+            }
+        }
+    }
+
+    private void firebaseAuthWithEmailAndPassword(String email, String senha) {
         autenticacao.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     usuario.setId(autenticacao.getCurrentUser().getUid());
-                    preferencias.salvarLogin(usuario.getId());
+                    preferencias.salvarLogin(usuario);
+
+                    if (referencia.child(usuario.getId()).setValue(usuario).isSuccessful()) {
+                        preferencias.salvarStatusSincronia(true);
+                    } else {
+                        preferencias.salvarStatusSincronia(false);
+                    }
 
                     UsuarioDAO dao = new UsuarioDAO(CadastroActivity.this);
-                    preferencias.salvarStatusSincronia(dao.salvar(usuario));
+                    dao.salvar(usuario);
 
                     alerta("Usuário cadastrado com sucesso");
 

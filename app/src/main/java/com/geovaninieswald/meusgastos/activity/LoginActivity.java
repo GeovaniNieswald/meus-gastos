@@ -39,6 +39,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserInfo;
+import com.google.firebase.database.DatabaseReference;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -52,6 +54,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     private GoogleSignInClient mGoogleSignInClient;
     private CallbackManager callbackManager;
     private FirebaseAuth autenticacao;
+    private DatabaseReference referencia;
     private Usuario usuario;
 
     private final int RC_SIGN_IN = 101;
@@ -63,6 +66,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.activity_login);
 
         preferencias = new SharedFirebasePreferences(LoginActivity.this);
+        referencia = ConexaoFirebase.getFirebase("usuarios");
 
         if (preferencias.verificarLogin()) {
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
@@ -85,7 +89,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                firebaseAuthWithGoogleFacebook(loginResult.getAccessToken());
+                firebaseAuthWithFacebook(loginResult.getAccessToken());
             }
 
             @Override
@@ -125,6 +129,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onStart() {
         super.onStart();
+
         autenticacao = ConexaoFirebase.getFirebaseAuth();
     }
 
@@ -149,7 +154,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         login(GoogleAuthProvider.getCredential(acct.getIdToken(), null));
     }
 
-    private void firebaseAuthWithGoogleFacebook(AccessToken token) {
+    private void firebaseAuthWithFacebook(AccessToken token) {
         login(FacebookAuthProvider.getCredential(token.getToken()));
     }
 
@@ -160,13 +165,28 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 if (task.isSuccessful()) {
                     FirebaseUser usuarioFirebase = autenticacao.getCurrentUser();
 
-                    usuario = new Usuario(usuarioFirebase.getDisplayName(), usuarioFirebase.getPhotoUrl().toString(), usuarioFirebase.getEmail());
+                    String urlImagem =  usuarioFirebase.getPhotoUrl().toString();
+                    urlImagem = urlImagem.replace("/s96-c/","/s70-c/");
+
+                    for (UserInfo profile : usuarioFirebase.getProviderData()) {
+                        if (FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
+                            urlImagem = "https://graph.facebook.com/" + profile.getUid() + "/picture?height=70";
+                        }
+                    }
+
+                    usuario = new Usuario(usuarioFirebase.getDisplayName(), urlImagem, usuarioFirebase.getEmail());
                     usuario.setId(usuarioFirebase.getUid());
 
-                    preferencias.salvarLogin(usuario.getId());
+                    preferencias.salvarLogin(usuario);
+
+                    if (referencia.child(usuario.getId()).setValue(usuario).isSuccessful()) {
+                        preferencias.salvarStatusSincronia(true);
+                    } else {
+                        preferencias.salvarStatusSincronia(false);
+                    }
 
                     UsuarioDAO dao = new UsuarioDAO(LoginActivity.this);
-                    preferencias.salvarStatusSincronia(dao.salvar(usuario));
+                    dao.salvar(usuario);
 
                     // CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
 

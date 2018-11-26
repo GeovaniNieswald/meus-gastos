@@ -2,15 +2,12 @@
     <string name="app_name">Meus Gastos</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="login_google">Fazer login com o Google</string>
     <string name="login_facebook">Fazer login com o Facebook</string>
     <string name="login_email">Fazer login com e-mail</string>
-    <string name="title_activity_login_email">Login com e-mail</string>
-    <string name="title_activity_cadastro">Cadastro com e-mail</string>
+    <string name="login">Login</string>
+    <string name="cadastro">Cadastro</string>
     <string name="facebook_app_id">2217976128461629</string>
     <string name="fb_login_protocol_scheme">fb2217976128461629</string>
 </resources>

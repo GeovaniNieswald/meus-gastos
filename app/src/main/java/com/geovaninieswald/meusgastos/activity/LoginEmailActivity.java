@@ -12,10 +12,15 @@ import android.widget.Toast;
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
+import com.geovaninieswald.meusgastos.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoginEmailActivity extends Activity implements View.OnClickListener {
 
@@ -23,7 +28,9 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
     private Button btnLogin, btnNovo;
 
     private FirebaseAuth autenticacao;
-    SharedFirebasePreferences preferencias;
+    private SharedFirebasePreferences preferencias;
+    private DatabaseReference referencia;
+    private Usuario usuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +38,7 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
         setContentView(R.layout.activity_login_email);
 
         preferencias = new SharedFirebasePreferences(LoginEmailActivity.this);
+        referencia = ConexaoFirebase.getFirebase("usuarios");
 
         edtEmail = findViewById(R.id.emailID);
         edtSenha = findViewById(R.id.senhaID);
@@ -64,15 +72,36 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
     @Override
     protected void onStart() {
         super.onStart();
+
         autenticacao = ConexaoFirebase.getFirebaseAuth();
+
+        referencia.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot objSnapshot : dataSnapshot.getChildren()) {
+                    usuario = objSnapshot.getValue(Usuario.class);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
     }
 
-    private void login(final String email, String senha) {
+    private void login(String email, String senha) {
         autenticacao.signInWithEmailAndPassword(email, senha).addOnCompleteListener(LoginEmailActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    preferencias.salvarLogin(autenticacao.getCurrentUser().getUid());
+                    String id = autenticacao.getCurrentUser().getUid();
+
+                    referencia.child(id);
+                    usuario.setId(id);
+
+                    alerta(usuario.getId() + " " + usuario.getEmail() + " " + usuario.getNome() + " " + usuario.getImagem());
+
+                    preferencias.salvarLogin(usuario);
 
                     // CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
 
