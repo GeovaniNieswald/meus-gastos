@@ -89,7 +89,6 @@ public class SharedFirebasePreferences {
     }
 
     private class BaixarImagem extends AsyncTask<String, Void, Boolean> {
-
         @Override
         protected Boolean doInBackground(String... strings) {
             boolean retornoOk = true;

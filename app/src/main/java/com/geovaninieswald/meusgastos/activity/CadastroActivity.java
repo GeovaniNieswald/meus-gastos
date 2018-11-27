@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -23,6 +24,7 @@ import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
 import com.geovaninieswald.meusgastos.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,8 +32,9 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class CadastroActivity extends Activity implements View.OnClickListener {
@@ -41,12 +44,13 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
     private Button btnCadastrar;
 
     private FirebaseAuth autenticacao;
-    private DatabaseReference referencia;
+    private DatabaseReference referenciaDB;
+    private StorageReference referenciaST;
     private SharedFirebasePreferences preferencias;
-    private Usuario usuario;
 
+    private Usuario usuario;
     private int controle;
-    private Bitmap bm;
+    private Uri uriImagem;
 
     private final int R_COD_GALERIA = 69;
     private final int R_COD_CAMERA = 70;
@@ -64,7 +68,7 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
 
-        referencia = ConexaoFirebase.getFirebase("usuarios");
+        referenciaDB = ConexaoFirebase.getDBReference("usuarios");
         preferencias = new SharedFirebasePreferences(CadastroActivity.this);
 
         icone = findViewById(R.id.iconeID);
@@ -101,25 +105,28 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == R_COD_GALERIA) {
-            if (data != null) {
+        if (data != null) {
+            if (requestCode == R_COD_GALERIA) {
                 try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
-                    salvarImagem(bitmap);
+                    uriImagem = data.getData();
+                    cortarImagem(MediaStore.Images.Media.getBitmap(getContentResolver(), uriImagem));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            } else if (requestCode == R_COD_CAMERA) {
+                uriImagem = data.getData();
+                Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                cortarImagem(thumbnail);
             }
-        } else if (requestCode == R_COD_CAMERA) {
-            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-            salvarImagem(thumbnail);
         }
     }
 
     private void selecionarImagem() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Selecione uma opção");
+
         CharSequence[] pictureDialogItems = {"Selecione imagem da galeria", "Tire uma foto com a câmera"};
+
         pictureDialog.setItems(pictureDialogItems, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -144,9 +151,13 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
         startActivityForResult(camera, R_COD_CAMERA);
     }
 
-    private void salvarImagem(Bitmap bitmap) {
-        this.bm = bitmap;
+    private void cortarImagem(Bitmap bitmap) {
 
+
+        exibirImagem(bitmap);
+    }
+
+    private void exibirImagem(Bitmap bitmap) {
         RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
         rbd.setCircular(true);
         icone.setBackground(rbd);
@@ -154,7 +165,6 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
 
     private void cadastrarUsuario() {
         String nome = edtNome.getText().toString();
-        String imagem = "";
         String email = edtEmail.getText().toString();
         String senha = edtSenha.getText().toString();
         String confirmarSenha = edtConfirmarSenha.getText().toString();
@@ -163,12 +173,12 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
             alerta("Insira todos os dados");
         } else {
             if (senha.equals(confirmarSenha)) {
-                if (++controle == 1) {
+                if (++controle == 1 && uriImagem == null) {
                     alerta("Você pode escolher uma imagem, basta tocar no icone");
                     icone.setBackground(getDrawable(R.drawable.ic_cadastro_alerta));
                     HANDLER.postDelayed(RUNNABLE, 4000);
                 } else {
-                    usuario = new Usuario(nome, imagem, email);
+                    usuario = new Usuario(nome, "", email);
                     firebaseAuthWithEmailAndPassword(email, senha);
                 }
             } else {
@@ -182,22 +192,7 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    usuario.setId(autenticacao.getCurrentUser().getUid());
-                    preferencias.salvarLogin(usuario);
-
-                    if (referencia.child(usuario.getId()).setValue(usuario).isSuccessful()) {
-                        preferencias.salvarStatusSincronia(true);
-                    } else {
-                        preferencias.salvarStatusSincronia(false);
-                    }
-
-                    UsuarioDAO dao = new UsuarioDAO(CadastroActivity.this);
-                    dao.salvar(usuario);
-
-                    alerta("Usuário cadastrado com sucesso");
-
-                    startActivity(new Intent(CadastroActivity.this, MainActivity.class));
-                    finish();
+                    enviarImagem();
                 } else {
                     String erro = "";
 
@@ -217,6 +212,47 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
                 }
             }
         });
+    }
+
+    private void enviarImagem() {
+        if (uriImagem == null) {
+            salvarUsuario();
+        } else {
+            referenciaST = ConexaoFirebase.getSTReference("usuarios/" + autenticacao.getCurrentUser().getUid());
+            referenciaST = referenciaST.child("imagem.jpg");
+
+            referenciaST.putFile(uriImagem).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    referenciaST.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            usuario.setImagem(uri.toString());
+                            salvarUsuario();
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    private void salvarUsuario() {
+        usuario.setId(autenticacao.getCurrentUser().getUid());
+        preferencias.salvarLogin(usuario);
+
+        if (referenciaDB.child(usuario.getId()).setValue(usuario).isSuccessful()) {
+            preferencias.salvarStatusSincronia(true);
+        } else {
+            preferencias.salvarStatusSincronia(false);
+        }
+
+        UsuarioDAO dao = new UsuarioDAO(CadastroActivity.this);
+        dao.salvar(usuario);
+
+        alerta("Usuário cadastrado com sucesso");
+
+        startActivity(new Intent(CadastroActivity.this, MainActivity.class));
+        finish();
     }
 
     private void alerta(String msg) {

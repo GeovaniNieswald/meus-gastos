@@ -29,7 +29,7 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
     private FirebaseAuth autenticacao;
     private SharedFirebasePreferences preferencias;
-    private DatabaseReference referencia;
+    private DatabaseReference referenciaDB;
     private Usuario usuario;
 
     @Override
@@ -38,7 +38,7 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
         setContentView(R.layout.activity_login_email);
 
         preferencias = new SharedFirebasePreferences(LoginEmailActivity.this);
-        referencia = ConexaoFirebase.getFirebase("usuarios");
+        referenciaDB = ConexaoFirebase.getDBReference("usuarios");
 
         edtEmail = findViewById(R.id.emailID);
         edtSenha = findViewById(R.id.senhaID);
@@ -75,7 +75,7 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
         autenticacao = ConexaoFirebase.getFirebaseAuth();
 
-        referencia.addListenerForSingleValueEvent(new ValueEventListener() {
+        referenciaDB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot objSnapshot : dataSnapshot.getChildren()) {
@@ -96,10 +96,8 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
                 if (task.isSuccessful()) {
                     String id = autenticacao.getCurrentUser().getUid();
 
-                    referencia.child(id);
+                    referenciaDB.child(id);
                     usuario.setId(id);
-
-                    alerta(usuario.getId() + " " + usuario.getEmail() + " " + usuario.getNome() + " " + usuario.getImagem());
 
                     preferencias.salvarLogin(usuario);
 

@@ -54,7 +54,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     private GoogleSignInClient mGoogleSignInClient;
     private CallbackManager callbackManager;
     private FirebaseAuth autenticacao;
-    private DatabaseReference referencia;
+    private DatabaseReference referenciaDB;
     private Usuario usuario;
 
     private final int RC_SIGN_IN = 101;
@@ -66,7 +66,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.activity_login);
 
         preferencias = new SharedFirebasePreferences(LoginActivity.this);
-        referencia = ConexaoFirebase.getFirebase("usuarios");
+        referenciaDB = ConexaoFirebase.getDBReference("usuarios");
 
         if (preferencias.verificarLogin()) {
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
@@ -165,8 +165,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 if (task.isSuccessful()) {
                     FirebaseUser usuarioFirebase = autenticacao.getCurrentUser();
 
-                    String urlImagem =  usuarioFirebase.getPhotoUrl().toString();
-                    urlImagem = urlImagem.replace("/s96-c/","/s70-c/");
+                    String urlImagem = usuarioFirebase.getPhotoUrl().toString();
+                    urlImagem = urlImagem.replace("/s96-c/", "/s70-c/");
 
                     for (UserInfo profile : usuarioFirebase.getProviderData()) {
                         if (FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
@@ -179,7 +179,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
                     preferencias.salvarLogin(usuario);
 
-                    if (referencia.child(usuario.getId()).setValue(usuario).isSuccessful()) {
+                    if (referenciaDB.child(usuario.getId()).setValue(usuario).isSuccessful()) {
                         preferencias.salvarStatusSincronia(true);
                     } else {
                         preferencias.salvarStatusSincronia(false);
