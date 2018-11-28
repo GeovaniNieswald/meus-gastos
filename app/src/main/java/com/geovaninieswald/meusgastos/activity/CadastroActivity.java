@@ -1,8 +1,6 @@
 package com.geovaninieswald.meusgastos.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -34,6 +32,8 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.IOException;
 
@@ -51,9 +51,6 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
     private Usuario usuario;
     private int controle;
     private Uri uriImagem;
-
-    private final int R_COD_GALERIA = 69;
-    private final int R_COD_CAMERA = 70;
 
     private final Handler HANDLER = new Handler();
     private final Runnable RUNNABLE = new Runnable() {
@@ -97,7 +94,11 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
                 cadastrarUsuario();
                 break;
             case R.id.iconeID:
-                selecionarImagem();
+                CropImage.activity()
+                        .setGuidelines(CropImageView.Guidelines.ON)
+                        .setAspectRatio(1,1)
+                        .setFixAspectRatio(true)
+                        .start(this);
         }
     }
 
@@ -105,56 +106,20 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (data != null) {
-            if (requestCode == R_COD_GALERIA) {
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                Uri resultUri = result.getUri();
+
+                uriImagem = resultUri;
+
                 try {
-                    uriImagem = data.getData();
-                    cortarImagem(MediaStore.Images.Media.getBitmap(getContentResolver(), uriImagem));
+                    exibirImagem(MediaStore.Images.Media.getBitmap(getContentResolver(), uriImagem));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else if (requestCode == R_COD_CAMERA) {
-                uriImagem = data.getData();
-                Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-                cortarImagem(thumbnail);
             }
         }
-    }
-
-    private void selecionarImagem() {
-        AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
-        pictureDialog.setTitle("Selecione uma opção");
-
-        CharSequence[] pictureDialogItems = {"Selecione imagem da galeria", "Tire uma foto com a câmera"};
-
-        pictureDialog.setItems(pictureDialogItems, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == 0) {
-                    escolherGaleria();
-                } else if (which == 1) {
-                    escolherCamera();
-                }
-            }
-        });
-
-        pictureDialog.show();
-    }
-
-    private void escolherGaleria() {
-        Intent galeria = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galeria, R_COD_GALERIA);
-    }
-
-    private void escolherCamera() {
-        Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(camera, R_COD_CAMERA);
-    }
-
-    private void cortarImagem(Bitmap bitmap) {
-
-
-        exibirImagem(bitmap);
     }
 
     private void exibirImagem(Bitmap bitmap) {
