@@ -4,9 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
@@ -26,6 +30,9 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
     private EditText edtEmail, edtSenha;
     private Button btnLogin, btnNovo;
+    private ProgressBar carregando;
+    private ConstraintLayout containerMeio;
+    private ConstraintLayout containerFim;
 
     private FirebaseAuth autenticacao;
     private SharedFirebasePreferences preferencias;
@@ -44,6 +51,9 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
         edtSenha = findViewById(R.id.senhaID);
         btnLogin = findViewById(R.id.loginID);
         btnNovo = findViewById(R.id.novoID);
+        carregando = findViewById(R.id.carregandoID);
+        containerMeio = findViewById(R.id.containerMeioID);
+        containerFim = findViewById(R.id.containerFimID);
 
         btnLogin.setOnClickListener(this);
         btnNovo.setOnClickListener(this);
@@ -90,6 +100,8 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
     }
 
     private void login(String email, String senha) {
+        iniciarCarregamento();
+
         autenticacao.signInWithEmailAndPassword(email, senha).addOnCompleteListener(LoginEmailActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -103,9 +115,12 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
                     // CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
 
-                    startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
+                    finishAffinity();
                     finish();
+                    startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
                 } else {
+                    pararCarregamento();
+
                     alerta("Erro ao logar");
                 }
             }
@@ -114,5 +129,37 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
     private void alerta(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    private void iniciarCarregamento() {
+        carregando.setVisibility(View.VISIBLE);
+
+        for (int i = 0; i < containerMeio.getChildCount(); i++) {
+            View child = containerMeio.getChildAt(i);
+            child.setEnabled(false);
+        }
+
+        for (int i = 0; i < containerFim.getChildCount(); i++) {
+            View child = containerFim.getChildAt(i);
+            child.setEnabled(false);
+        }
+    }
+
+    private void pararCarregamento() {
+        carregando.setVisibility(View.INVISIBLE);
+
+        for (int i = 0; i < containerMeio.getChildCount(); i++) {
+            View child = containerMeio.getChildAt(i);
+            if (child instanceof TextView || child instanceof ImageView) {
+                // Resolver crash
+            } else {
+                child.setEnabled(true);
+            }
+        }
+
+        for (int i = 0; i < containerFim.getChildCount(); i++) {
+            View child = containerFim.getChildAt(i);
+            child.setEnabled(true);
+        }
     }
 }

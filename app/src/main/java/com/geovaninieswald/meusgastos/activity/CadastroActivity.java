@@ -8,12 +8,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
@@ -42,6 +44,8 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
     private ImageView icone;
     private EditText edtNome, edtEmail, edtSenha, edtConfirmarSenha;
     private Button btnCadastrar;
+    private ProgressBar carregando;
+    private ConstraintLayout containerMeio;
 
     private FirebaseAuth autenticacao;
     private DatabaseReference referenciaDB;
@@ -74,6 +78,8 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
         edtSenha = findViewById(R.id.senhaID);
         edtConfirmarSenha = findViewById(R.id.confirmarSenhaID);
         btnCadastrar = findViewById(R.id.cadastrarID);
+        carregando = findViewById(R.id.carregandoID);
+        containerMeio = findViewById(R.id.containerMeioID);
 
         btnCadastrar.setOnClickListener(this);
         icone.setOnClickListener(this);
@@ -96,7 +102,7 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
             case R.id.iconeID:
                 CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)
-                        .setAspectRatio(1,1)
+                        .setAspectRatio(1, 1)
                         .setFixAspectRatio(true)
                         .start(this);
         }
@@ -153,12 +159,16 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
     }
 
     private void firebaseAuthWithEmailAndPassword(String email, String senha) {
+        iniciarCarregamento();
+
         autenticacao.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     enviarImagem();
                 } else {
+                    pararCarregamento();
+
                     String erro = "";
 
                     try {
@@ -214,13 +224,30 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
         UsuarioDAO dao = new UsuarioDAO(CadastroActivity.this);
         dao.salvar(usuario);
 
-        alerta("Usuário cadastrado com sucesso");
-
-        startActivity(new Intent(CadastroActivity.this, MainActivity.class));
+        finishAffinity();
         finish();
+        startActivity(new Intent(CadastroActivity.this, MainActivity.class));
     }
 
     private void alerta(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    private void iniciarCarregamento() {
+        carregando.setVisibility(View.VISIBLE);
+
+        for (int i = 0; i < containerMeio.getChildCount(); i++) {
+            View child = containerMeio.getChildAt(i);
+            child.setEnabled(false);
+        }
+    }
+
+    private void pararCarregamento() {
+        carregando.setVisibility(View.INVISIBLE);
+
+        for (int i = 0; i < containerMeio.getChildCount(); i++) {
+            View child = containerMeio.getChildAt(i);
+            child.setEnabled(true);
+        }
     }
 }

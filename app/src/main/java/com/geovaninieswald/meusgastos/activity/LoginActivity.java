@@ -7,10 +7,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -49,6 +51,8 @@ import java.util.Arrays;
 public class LoginActivity extends Activity implements View.OnClickListener {
 
     private Button btnLoginGoogle, btnLoginFacebook, btnLoginEmail;
+    private ProgressBar carregando;
+    private ConstraintLayout containerCentral;
 
     private SharedFirebasePreferences preferencias;
     private GoogleSignInClient mGoogleSignInClient;
@@ -57,7 +61,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     private DatabaseReference referenciaDB;
     private Usuario usuario;
 
-    private final int RC_SIGN_IN = 101;
+    private final int COD_GOOGLE = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +73,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         referenciaDB = ConexaoFirebase.getDBReference("usuarios");
 
         if (preferencias.verificarLogin()) {
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
+            startActivity(new Intent(LoginActivity.this, MainActivity.class));
         }
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -106,6 +110,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         btnLoginGoogle = findViewById(R.id.loginGoogleID);
         btnLoginFacebook = findViewById(R.id.loginFaceID);
         btnLoginEmail = findViewById(R.id.loginEmailID);
+        carregando = findViewById(R.id.carregandoID);
+        containerCentral = findViewById(R.id.containerCentralID);
 
         btnLoginGoogle.setOnClickListener(this);
         btnLoginFacebook.setOnClickListener(this);
@@ -116,7 +122,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.loginGoogleID:
-                startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
+                startActivityForResult(mGoogleSignInClient.getSignInIntent(), COD_GOOGLE);
                 break;
             case R.id.loginFaceID:
                 LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile"));
@@ -137,7 +143,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == COD_GOOGLE) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
 
             try {
@@ -159,6 +165,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     }
 
     private void login(AuthCredential credential) {
+        iniciarCarregamento();
+
         autenticacao.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -190,9 +198,11 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
                     // CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
 
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 } else {
+                    pararCarregamento();
+
                     String erro = "";
 
                     try {
@@ -222,6 +232,24 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
             }
         } catch (PackageManager.NameNotFoundException | NoSuchAlgorithmException e) {
+        }
+    }
+
+    private void iniciarCarregamento() {
+        carregando.setVisibility(View.VISIBLE);
+
+        for (int i = 0; i < containerCentral.getChildCount(); i++) {
+            View child = containerCentral.getChildAt(i);
+            child.setEnabled(false);
+        }
+    }
+
+    private void pararCarregamento() {
+        carregando.setVisibility(View.INVISIBLE);
+
+        for (int i = 0; i < containerCentral.getChildCount(); i++) {
+            View child = containerCentral.getChildAt(i);
+            child.setEnabled(true);
         }
     }
 }
