@@ -150,11 +150,7 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
         for (int i = 0; i < containerMeio.getChildCount(); i++) {
             View child = containerMeio.getChildAt(i);
-            if (child instanceof TextView || child instanceof ImageView) {
-                // Resolver crash
-            } else {
-                child.setEnabled(true);
-            }
+            child.setEnabled(true);
         }
 
         for (int i = 0; i < containerFim.getChildCount(); i++) {
