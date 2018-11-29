@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_categorias:
                 break;
             case R.id.nav_rel_redimentos:
+                startActivity(new Intent(MainActivity.this, AddRendimentoActivity.class));
                 break;
             case R.id.nav_rel_gastos:
                 break;
