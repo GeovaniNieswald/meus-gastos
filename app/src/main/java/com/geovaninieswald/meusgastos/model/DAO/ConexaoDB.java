@@ -9,7 +9,7 @@ public class ConexaoDB extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "meus_gastos.db";
     private static final int DATABASE_VERSION = 1;
 
-    private final String CREATE_TABLE_USUARIO = "CREATE TABLE IF NOT EXISTS usuario (id INTEGER PRIMARY KEY, nome TEXT NOT NULL, imagem TEXT, email TEXT NOT NULL);";
+    private final String CREATE_TABLE_USUARIO = "CREATE TABLE IF NOT EXISTS usuario (id TEXT PRIMARY KEY, nome TEXT NOT NULL, imagem TEXT, email TEXT NOT NULL);";
     //private final String CREATE_TABLE_DESPESA = "CREATE TABLE IF NOT EXISTS despesa ();";
     //private final String CREATE_TABLE_RENDIMENTO = "CREATE TABLE IF NOT EXISTS rendimento ();";
     //private final String CREATE_TABLE_CAT_DESPESA = "CREATE TABLE IF NOT EXISTS categoria_despesa ();";

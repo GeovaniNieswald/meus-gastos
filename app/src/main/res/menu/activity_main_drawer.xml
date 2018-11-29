@@ -5,6 +5,11 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_home"
+            android:checked="true"
+            android:icon="@drawable/ic_menu_home"
+            android:title="Home" />
+        <item
             android:id="@+id/nav_transacoes"
             android:icon="@drawable/ic_menu_transacoes"
             android:title="Transações" />
@@ -16,47 +21,52 @@
 
     <item android:title="Relatórios">
         <menu>
-            <item
-                android:id="@+id/nav_rel_redimentos"
-                android:icon="@drawable/ic_menu_rendimento"
-                android:title="Rendimentos" />
-            <item
-                android:id="@+id/nav_rel_gastos"
-                android:icon="@drawable/ic_menu_gasto"
-                android:title="Gastos" />
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_rel_redimentos"
+                    android:icon="@drawable/ic_menu_rendimento"
+                    android:title="Rendimentos" />
+                <item
+                    android:id="@+id/nav_rel_gastos"
+                    android:icon="@drawable/ic_menu_gasto"
+                    android:title="Gastos" />
 
-            <item
-                android:id="@+id/nav_rel_calendario"
-                android:icon="@drawable/ic_menu_calendario"
-                android:title="Calendário" />
+                <item
+                    android:id="@+id/nav_rel_calendario"
+                    android:icon="@drawable/ic_menu_calendario"
+                    android:title="Calendário" />
+            </group>
         </menu>
     </item>
 
     <item android:title="Comunicação">
         <menu>
-            <item
-                android:id="@+id/nav_compartilhar"
-                android:icon="@drawable/ic_menu_compartilhar"
-                android:title="Compartilhar" />
-            <item
-                android:id="@+id/nav_avaliar"
-                android:icon="@drawable/ic_menu_avaliar"
-                android:title="Avaliar" />
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_compartilhar"
+                    android:icon="@drawable/ic_menu_compartilhar"
+                    android:title="Compartilhar" />
+                <item
+                    android:id="@+id/nav_avaliar"
+                    android:icon="@drawable/ic_menu_avaliar"
+                    android:title="Avaliar" />
+            </group>
         </menu>
     </item>
 
     <item android:title="Outros">
         <menu>
-            <item
-                android:id="@+id/nav_sobre"
-                android:icon="@drawable/ic_menu_sobre"
-                android:title="Sobre" />
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_sobre"
+                    android:icon="@drawable/ic_menu_sobre"
+                    android:title="Sobre" />
 
-            <item
-                android:id="@+id/nav_sair"
-                android:icon="@drawable/ic_menu_sair"
-                android:title="Sair" />
+                <item
+                    android:id="@+id/nav_sair"
+                    android:icon="@drawable/ic_menu_sair"
+                    android:title="Sair" />
+            </group>
         </menu>
     </item>
-
 </menu>

@@ -95,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // ADICIONAR OPÇÃO SINCRONIZAR
 
         switch (item.getItemId()) {
+            case R.id.nav_home:
+                break;
             case R.id.nav_transacoes:
                 break;
             case R.id.nav_categorias:
