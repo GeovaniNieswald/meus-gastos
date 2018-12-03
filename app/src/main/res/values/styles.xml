@@ -26,4 +26,19 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="MenuButtonsSmall">
+        <item name="fab_size">mini</item>
+        <item name="fab_colorNormal">#347ed1</item>
+        <item name="fab_colorPressed">#2272CD</item>
+        <item name="fab_colorRipple">#62B2FF</item>
+    </style>
+
+    <style name="MenuButtonsSmall.Red">
+        <item name="fab_size">mini</item>
+        <item name="fab_colorNormal">#d93636</item>
+        <item name="fab_colorPressed">#cd2522</item>
+        <item name="fab_colorRipple">#ff6262</item>
+    </style>
+
 </resources>

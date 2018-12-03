@@ -19,11 +19,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.geovaninieswald.meusgastos.model.Usuario;
+import com.github.clans.fab.FloatingActionMenu;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -32,6 +34,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Usuario usuario;
     private SharedFirebasePreferences preferencias;
+
+    private FloatingActionMenu famMenu;
+    private com.github.clans.fab.FloatingActionButton fabReceita, fabDespesa;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +49,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        famMenu =  findViewById(R.id.famMenuID);
+        fabReceita = findViewById(R.id.fabReceitaID);
+        fabDespesa = findViewById(R.id.fabDespesaID);
+
+        fabDespesa.setOnClickListener(clFamMenu);
+        fabReceita.setOnClickListener(clFamMenu);
+
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -76,17 +81,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             rbd.setCircular(true);
             imagem.setBackground(rbd);
         }
+
     }
+
+    private View.OnClickListener clFamMenu = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.fabDespesaID:
+                    Toast.makeText(MainActivity.this, "Despesas", Toast.LENGTH_SHORT).show();
+/*                  Quando estiver pronta a AddDespesas
+                    startActivity(new Intent(MainActivity.this, AddDespesaActivity.class));*/
+                    break;
+                case R.id.fabReceitaID:
+                    startActivity(new Intent(MainActivity.this, AddRendimentoActivity.class));
+                    break;
+            }
+        }
+    };
+
+
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
     }
+
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -123,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 finish();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
