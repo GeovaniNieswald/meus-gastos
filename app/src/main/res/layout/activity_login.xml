@@ -21,7 +21,7 @@
         app:layout_constraintVertical_bias="0.496">
 
         <TextView
-            android:id="@+id/nomeAppID"
+            android:id="@+id/nomeApp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -32,7 +32,7 @@
             android:textSize="30sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/loginGoogleID"
-            app:layout_constraintStart_toEndOf="@+id/iconeID"
+            app:layout_constraintStart_toEndOf="@+id/icone"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
@@ -50,7 +50,7 @@
             android:textColor="@color/common_google_signin_btn_text_dark_focused"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iconeID" />
+            app:layout_constraintTop_toBottomOf="@+id/icone" />
 
         <Button
             android:id="@+id/loginFaceID"
@@ -88,7 +88,7 @@
             app:layout_constraintTop_toBottomOf="@+id/loginFaceID" />
 
         <ImageView
-            android:id="@+id/iconeID"
+            android:id="@+id/icone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/app_name"

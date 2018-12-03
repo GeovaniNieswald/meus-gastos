@@ -72,7 +72,7 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
         referenciaDB = ConexaoFirebase.getDBReference("usuarios");
         preferencias = new SharedFirebasePreferences(CadastroActivity.this);
 
-        icone = findViewById(R.id.iconeID);
+        icone = findViewById(R.id.icone);
         edtNome = findViewById(R.id.nomeID);
         edtEmail = findViewById(R.id.emailID);
         edtSenha = findViewById(R.id.senhaID);
@@ -99,7 +99,7 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
             case R.id.cadastrarID:
                 cadastrarUsuario();
                 break;
-            case R.id.iconeID:
+            case R.id.icone:
                 CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)
                         .setAspectRatio(1, 1)

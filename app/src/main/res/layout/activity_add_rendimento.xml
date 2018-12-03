@@ -6,6 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/grad_bg"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:context=".activity.AddRendimentoActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -33,20 +35,20 @@
             android:layout_height="match_parent">
 
             <android.support.constraint.ConstraintLayout
-                android:id="@+id/containerMeio"
+                android:id="@+id/containerMeioID"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="35dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="30dp"
                 android:layout_marginEnd="35dp"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="100dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
-                    android:id="@+id/textView4"
+                    android:id="@+id/descricao"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="3dp"
@@ -56,60 +58,19 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <EditText
-                    android:id="@+id/editText3"
+                    android:id="@+id/descricaoID"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="Ex Salário"
-                    android:inputType="textPersonName"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView4" />
-
-                <TextView
-                    android:id="@+id/textView5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="3dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Valor R$"
+                    android:inputType="text|textShortMessage"
                     android:textColor="@color/white"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/editText6" />
-
-                <EditText
-                    android:id="@+id/editText4"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="numberSigned"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView5" />
+                    app:layout_constraintTop_toBottomOf="@+id/descricao" />
 
                 <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="3dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Data"
-                    android:textColor="@color/white"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/editText4" />
-
-                <EditText
-                    android:id="@+id/editText5"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="date"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView6" />
-
-                <TextView
-                    android:id="@+id/textView7"
+                    android:id="@+id/categoria"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="3dp"
@@ -117,30 +78,77 @@
                     android:text="Categoria"
                     android:textColor="@color/white"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/editText3" />
+                    app:layout_constraintTop_toBottomOf="@+id/descricaoID" />
 
                 <EditText
-                    android:id="@+id/editText6"
+                    android:id="@+id/categoriaID"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
+                    android:focusableInTouchMode="false"
                     android:hint="Selecione"
-                    android:inputType="textPersonName"
+                    android:inputType="text|textShortMessage"
+                    android:textColor="@color/white"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView7" />
+                    app:layout_constraintTop_toBottomOf="@+id/categoria" />
+
+                <TextView
+                    android:id="@+id/calor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Valor R$"
+                    android:textColor="@color/white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/categoriaID" />
+
+                <faranjit.currency.edittext.CurrencyEditText
+                    android:id="@+id/valorID"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:textColor="@color/white"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/calor"
+                    app:showSymbol="true" />
+
+                <TextView
+                    android:id="@+id/data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Data"
+                    android:textColor="@color/white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/valorID" />
+
+                <EditText
+                    android:id="@+id/dataID"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:focusableInTouchMode="false"
+                    android:inputType="textShortMessage"
+                    android:textColor="@color/white"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/data" />
 
                 <android.support.constraint.ConstraintLayout
-                    android:id="@+id/constraintLayout"
+                    android:id="@+id/containerRepetir"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="3dp"
                     android:layout_marginTop="20dp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/editText5">
+                    app:layout_constraintTop_toBottomOf="@+id/dataID">
 
                     <Switch
-                        android:id="@+id/switch2"
+                        android:id="@+id/repetirID"
                         android:layout_width="wrap_content"
                         android:layout_height="0dp"
                         android:text="Repetir   "
@@ -151,7 +159,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <EditText
-                        android:id="@+id/editText7"
+                        android:id="@+id/quantidadeID"
                         android:layout_width="54dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="30dp"
@@ -160,19 +168,20 @@
                         android:inputType="number"
                         android:textAlignment="center"
                         android:textColor="@color/white"
-                        android:visibility="visible"
+                        android:visibility="invisible"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/switch2"
+                        app:layout_constraintStart_toEndOf="@+id/repetirID"
                         app:layout_constraintTop_toTopOf="parent" />
                 </android.support.constraint.ConstraintLayout>
 
                 <Button
-                    android:id="@+id/button2"
+                    android:id="@+id/adicionarID"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:background="@drawable/btn_bg"
+                    android:enabled="true"
                     android:paddingLeft="70dp"
                     android:paddingRight="70dp"
                     android:text="Adicionar"
@@ -182,9 +191,20 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+                    app:layout_constraintTop_toBottomOf="@+id/containerRepetir" />
 
             </android.support.constraint.ConstraintLayout>
+
+            <ProgressBar
+                android:id="@+id/carregandoID"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="30dp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
 

@@ -84,7 +84,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        FacebookSdk.sdkInitialize(getApplicationContext());
+        //FacebookSdk.sdkInitialize(getApplicationContext());
 
         callbackManager = CallbackManager.Factory.create();
 
