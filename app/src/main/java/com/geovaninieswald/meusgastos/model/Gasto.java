@@ -1,4 +1,4 @@
 package com.geovaninieswald.meusgastos.model;
 
-public class Despesa {
+public class Gasto {
 }

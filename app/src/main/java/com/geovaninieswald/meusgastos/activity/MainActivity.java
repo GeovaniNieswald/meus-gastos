@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.view.View;
@@ -15,7 +13,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,13 +28,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ImageView imagem;
     private TextView nome, email;
-
-    private Usuario usuario;
-    private SharedFirebasePreferences preferencias;
-
     private FloatingActionMenu famMenu;
     private com.github.clans.fab.FloatingActionButton fabReceita, fabDespesa;
 
+    private Usuario usuario;
+    private SharedFirebasePreferences preferencias;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +44,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbarID);
         setSupportActionBar(toolbar);
 
-        famMenu =  findViewById(R.id.famMenuID);
-        fabReceita = findViewById(R.id.fabReceitaID);
-        fabDespesa = findViewById(R.id.fabDespesaID);
+        famMenu = findViewById(R.id.famMenuID);
+        fabReceita = findViewById(R.id.fabRendimentoID);
+        fabDespesa = findViewById(R.id.fabGastoID);
 
         fabDespesa.setOnClickListener(clFamMenu);
         fabReceita.setOnClickListener(clFamMenu);
-
 
         DrawerLayout drawer = findViewById(R.id.drawerLayoutID);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -81,26 +75,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             rbd.setCircular(true);
             imagem.setBackground(rbd);
         }
-
     }
 
     private View.OnClickListener clFamMenu = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.fabDespesaID:
+                case R.id.fabGastoID:
                     Toast.makeText(MainActivity.this, "Despesas", Toast.LENGTH_SHORT).show();
-/*                  Quando estiver pronta a AddDespesas
-                    startActivity(new Intent(MainActivity.this, AddDespesaActivity.class));*/
+                    //Quando estiver pronta a AddGasto
+                    //startActivity(new Intent(MainActivity.this, AddGastoActivity.class));
                     break;
-                case R.id.fabReceitaID:
+                case R.id.fabRendimentoID:
                     startActivity(new Intent(MainActivity.this, AddRendimentoActivity.class));
                     break;
             }
         }
     };
-
-
 
     @Override
     public void onBackPressed() {
@@ -111,8 +102,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             super.onBackPressed();
         }
     }
-
-
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -126,9 +115,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_transacoes:
                 break;
             case R.id.nav_categorias:
+                startActivity(new Intent(MainActivity.this, CategoriaActivity.class));
                 break;
             case R.id.nav_rel_redimentos:
-                startActivity(new Intent(MainActivity.this, AddRendimentoActivity.class));
                 break;
             case R.id.nav_rel_gastos:
                 break;
@@ -141,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_sobre:
                 break;
             case R.id.nav_sair:
-                // VERIFICAR SE ESTÁ SINCRONIZADO, CASO NÃO AVISAR QUE O USUÁRIO PERDERÁ DADOS, CONFIRMAÇÃO EM AMBOS OS CASOS
+                // VERIFICAR SE ESTÁ SINCRONIZADO, CASO NÃO, AVISAR QUE O USUÁRIO PERDERÁ DADOS, CONFIRMAÇÃO EM AMBOS OS CASOS
 
                 preferencias.sair();
                 ConexaoFirebase.sair();

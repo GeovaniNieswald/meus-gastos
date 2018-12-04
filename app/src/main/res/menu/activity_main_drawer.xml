@@ -15,6 +15,7 @@
             android:title="Transações" />
         <item
             android:id="@+id/nav_categorias"
+            android:checkable="false"
             android:icon="@drawable/ic_menu_categorias"
             android:title="Categorias" />
     </group>

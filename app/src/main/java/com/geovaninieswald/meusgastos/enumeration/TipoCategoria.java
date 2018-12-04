@@ -1,7 +1,7 @@
 package com.geovaninieswald.meusgastos.enumeration;
 
 public enum TipoCategoria {
-    DESPESA(0), RENDIMENTO(1);
+    GASTO(0), RENDIMENTO(1);
 
     private int codigo;
 

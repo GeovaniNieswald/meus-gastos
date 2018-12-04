@@ -6,5 +6,38 @@ public class Categoria {
 
     private int id;
     private TipoCategoria tipoCategoria;
-    private String nome;
+    private String descricao;
+
+    public Categoria() {
+    }
+
+    public Categoria(int id, TipoCategoria tipoCategoria, String descricao) {
+        this.id = id;
+        this.tipoCategoria = tipoCategoria;
+        this.descricao = descricao;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public TipoCategoria getTipoCategoria() {
+        return tipoCategoria;
+    }
+
+    public void setTipoCategoria(TipoCategoria tipoCategoria) {
+        this.tipoCategoria = tipoCategoria;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
 }

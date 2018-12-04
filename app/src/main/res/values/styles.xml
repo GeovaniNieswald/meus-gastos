@@ -30,14 +30,14 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="MenuButtonsSmall">
+    <style name="FabMiniBlue">
         <item name="fab_size">mini</item>
         <item name="fab_colorNormal">#347ed1</item>
         <item name="fab_colorPressed">#2272CD</item>
         <item name="fab_colorRipple">#62B2FF</item>
     </style>
 
-    <style name="MenuButtonsSmall.Red">
+    <style name="FabMiniRed">
         <item name="fab_size">mini</item>
         <item name="fab_colorNormal">#d93636</item>
         <item name="fab_colorPressed">#cd2522</item>

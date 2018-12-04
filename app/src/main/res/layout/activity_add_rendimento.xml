@@ -181,7 +181,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:background="@drawable/btn_bg"
-                    android:enabled="true"
                     android:paddingLeft="70dp"
                     android:paddingRight="70dp"
                     android:text="Adicionar"
@@ -207,6 +206,4 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
-
-
 </android.support.constraint.ConstraintLayout>
