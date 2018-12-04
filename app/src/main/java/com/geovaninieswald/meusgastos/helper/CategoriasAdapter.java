@@ -13,10 +13,10 @@ import java.util.List;
 
 public class CategoriasAdapter extends RecyclerView.Adapter<CategoriasHolder> {
 
-    private final List<Categoria> CATEGORIAS;
+    private List<Categoria> categorias;
 
     public CategoriasAdapter(List<Categoria> categorias) {
-        this.CATEGORIAS = categorias;
+        this.categorias = categorias;
     }
 
     @NonNull
@@ -27,9 +27,9 @@ public class CategoriasAdapter extends RecyclerView.Adapter<CategoriasHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull CategoriasHolder categoriasHolder, int i) {
-        categoriasHolder.descricao.setText(CATEGORIAS.get(i).getDescricao());
+        categoriasHolder.descricao.setText(categorias.get(i).getDescricao());
 
-        if (CATEGORIAS.get(i).getTipoCategoria() == TipoCategoria.GASTO) {
+        if (categorias.get(i).getTipoCategoria() == TipoCategoria.GASTO) {
             categoriasHolder.tipo.setText("Gasto");
         } else {
             categoriasHolder.tipo.setText("Rendimento");
@@ -38,6 +38,20 @@ public class CategoriasAdapter extends RecyclerView.Adapter<CategoriasHolder> {
 
     @Override
     public int getItemCount() {
-        return CATEGORIAS != null ? CATEGORIAS.size() : 0;
+        return categorias != null ? categorias.size() : 0;
+    }
+
+    public void removerCategoria(int posicao) {
+        categorias.remove(posicao);
+        notifyItemRemoved(posicao);
+        notifyItemRangeChanged(posicao, getItemCount());
+    }
+
+    public void cancelarRemocao(int posicao) {
+        notifyItemChanged(posicao);
+    }
+
+    public long getDbId(int posicao) {
+        return categorias.get(posicao).getId();
     }
 }

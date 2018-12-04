@@ -1,6 +1,7 @@
 package com.geovaninieswald.meusgastos.model;
 
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
+import com.google.firebase.database.Exclude;
 
 public class Categoria {
 
@@ -17,6 +18,7 @@ public class Categoria {
         this.descricao = descricao;
     }
 
+    @Exclude
     public int getId() {
         return id;
     }

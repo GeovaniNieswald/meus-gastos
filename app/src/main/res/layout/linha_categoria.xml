@@ -23,9 +23,11 @@
         android:id="@+id/tipoID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="15dp"
         android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
         android:text="Gasto"
+        android:textColor="@color/common_google_signin_btn_text_light_focused"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/descricaoID" />

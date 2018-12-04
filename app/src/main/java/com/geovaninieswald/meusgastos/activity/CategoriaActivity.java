@@ -1,14 +1,18 @@
 package com.geovaninieswald.meusgastos.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.CategoriasAdapter;
@@ -50,14 +54,75 @@ public class CategoriaActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        adapter = new CategoriasAdapter(new CategoriaDAO(this).retornarTodas());
+        categorias.setAdapter(adapter);
+    }
+
     private void configurarRecycler() {
         categorias = findViewById(R.id.categoriasID);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         categorias.setLayoutManager(layoutManager);
-
-        CategoriaDAO dao = new CategoriaDAO(this);
-        adapter = new CategoriasAdapter(dao.retornarTodas());
-        categorias.setAdapter(adapter);
         categorias.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                final int POSICAO = viewHolder.getAdapterPosition();
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(viewHolder.itemView.getContext());
+
+                final AlertDialog alert = builder.setTitle("Confirmação")
+                        .setMessage("Tem certeza que deseja excluir esta categoria?")
+                        .setPositiveButton("Excluir", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                CategoriaDAO dao = new CategoriaDAO(getBaseContext());
+                                int numItens = dao.excluir(adapter.getDbId(POSICAO));
+
+                                if (numItens > 0) {
+                                    adapter.removerCategoria(POSICAO);
+                                    // Excluir do firebase
+                                    Toast.makeText(CategoriaActivity.this, "Categoria Excluida", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(CategoriaActivity.this, "Não foi possível excluir a categoria", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+                        .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                adapter.cancelarRemocao(POSICAO);
+                            }
+                        })
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                adapter.cancelarRemocao(POSICAO);
+                            }
+                        })
+                        .create();
+
+                alert.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+                        alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorPrimary));
+                        alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorPrimary));
+                    }
+                });
+
+                alert.show();
+            }
+        });
+
+        itemTouchHelper.attachToRecyclerView(categorias);
     }
 }
