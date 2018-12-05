@@ -23,7 +23,6 @@ public class AddCategoriaActivity extends AppCompatActivity {
     private RadioButton rendimento;
     private Button adicionar;
     private ProgressBar carregando;
-
     private ConstraintLayout containerMeio;
 
     @Override
@@ -39,10 +38,10 @@ public class AddCategoriaActivity extends AppCompatActivity {
 
         descricao = findViewById(R.id.descricaoID);
         rendimento = findViewById(R.id.rendimentoID);
-        adicionar = findViewById(R.id.adicionarID);
         carregando = findViewById(R.id.carregandoID);
         containerMeio = findViewById(R.id.containerMeioID);
 
+        adicionar = findViewById(R.id.adicionarID);
         adicionar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,7 +69,13 @@ public class AddCategoriaActivity extends AppCompatActivity {
                         pararCarregamento();
                         Toast.makeText(AddCategoriaActivity.this, "Não foi possível adicionar", Toast.LENGTH_SHORT).show();
                     } else {
-                        // Informar sucesso, resetar tela, enviar para firebase alterar sharedPreferences sobre sincronização
+                        pararCarregamento();
+
+                        descricao.setText("");
+                        rendimento.setChecked(true);
+
+                        Toast.makeText(AddCategoriaActivity.this, "Categoria adicionada com sucesso", Toast.LENGTH_SHORT).show();
+                        // enviar para firebase alterar sharedPreferences sobre sincronização
                     }
                 }
             }

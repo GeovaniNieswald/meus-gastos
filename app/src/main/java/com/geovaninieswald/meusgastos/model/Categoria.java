@@ -3,7 +3,9 @@ package com.geovaninieswald.meusgastos.model;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.google.firebase.database.Exclude;
 
-public class Categoria {
+import java.io.Serializable;
+
+public class Categoria implements Serializable {
 
     private int id;
     private TipoCategoria tipoCategoria;

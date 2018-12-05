@@ -69,4 +69,23 @@ public class CategoriaDAO {
 
         return categorias;
     }
+
+    public List<Categoria> retornarPorTipo(TipoCategoria tc) {
+        List<Categoria> categorias = new ArrayList<>();
+
+        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM categoria WHERE tipo = ?", new String[]{tc.getCodigo() + ""});
+
+        while (cursor.moveToNext()) {
+            Categoria c = new Categoria();
+            c.setId(cursor.getInt(0));
+            c.setDescricao(cursor.getString(1));
+            c.setTipoCategoria(tc);
+
+            categorias.add(c);
+        }
+
+        cursor.close();
+
+        return categorias;
+    }
 }

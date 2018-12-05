@@ -15,16 +15,18 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
-import com.geovaninieswald.meusgastos.helper.CategoriasAdapter;
+import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
+import com.geovaninieswald.meusgastos.helper.RecyclerViewCategoriaAdapter;
 import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
 
 public class CategoriaActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private FloatingActionButton fabAdd;
-
     private RecyclerView categorias;
-    private CategoriasAdapter adapter;
+    private RecyclerViewCategoriaAdapter adapter;
+
+    private boolean addRendimento;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,13 +39,14 @@ public class CategoriaActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         fabAdd = findViewById(R.id.fabAddID);
-
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(CategoriaActivity.this, AddCategoriaActivity.class));
             }
         });
+
+        addRendimento = getIntent().getBooleanExtra("addRendimento", false);
 
         configurarRecycler();
     }
@@ -58,7 +61,12 @@ public class CategoriaActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        adapter = new CategoriasAdapter(new CategoriaDAO(this).retornarTodas());
+        if (addRendimento) {
+            adapter = new RecyclerViewCategoriaAdapter(CategoriaActivity.this, new CategoriaDAO(this).retornarPorTipo(TipoCategoria.RENDIMENTO));
+        } else {
+            adapter = new RecyclerViewCategoriaAdapter(CategoriaActivity.this, new CategoriaDAO(this).retornarTodas());
+        }
+
         categorias.setAdapter(adapter);
     }
 

@@ -1,6 +1,8 @@
 package com.geovaninieswald.meusgastos.enumeration;
 
-public enum TipoCategoria {
+import java.io.Serializable;
+
+public enum TipoCategoria implements Serializable {
     GASTO(0), RENDIMENTO(1);
 
     private int codigo;
