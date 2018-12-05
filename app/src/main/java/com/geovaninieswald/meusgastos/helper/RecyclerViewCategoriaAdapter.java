@@ -48,7 +48,7 @@ public class RecyclerViewCategoriaAdapter extends RecyclerView.Adapter<RecyclerV
         categoriaViewHolder.linha.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (((Activity) context).getIntent().getBooleanExtra("addRendimento", false)) {
+                if (((Activity) context).getIntent().getBooleanExtra("transacao", false)) {
                     Intent resultIntent = new Intent();
                     resultIntent.putExtra("categoria", categorias.get(posicao));
                     ((Activity) context).setResult(Activity.RESULT_OK, resultIntent);

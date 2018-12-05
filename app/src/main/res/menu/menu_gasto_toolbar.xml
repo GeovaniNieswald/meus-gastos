@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appp="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.geovaninieswald.meusgastos.activity.AddGastoActivity">
+
+    <item
+        android:id="@+id/qr_code"
+        android:icon="@drawable/ic_qr_code"
+        android:title="QR Code"
+        appp:showAsAction="always" />
+</menu>

@@ -3,24 +3,26 @@ package com.geovaninieswald.meusgastos.model;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class Rendimento {
+public class Transacao {
 
     private int id;
     private String descricao;
     private Categoria categoria;
     private BigDecimal valor;
     private Date data;
+    private boolean paga;
     private int quantidade;
 
-    public Rendimento() {
+    public Transacao() {
     }
 
-    public Rendimento(int id, String descricao, Categoria categoria, BigDecimal valor, Date data, int quantidade) {
+    public Transacao(int id, String descricao, Categoria categoria, BigDecimal valor, Date data, boolean paga, int quantidade) {
         this.id = id;
         this.descricao = descricao;
         this.categoria = categoria;
         this.valor = valor;
         this.data = data;
+        this.paga = paga;
         this.quantidade = quantidade;
     }
 
@@ -62,6 +64,14 @@ public class Rendimento {
 
     public void setData(Date data) {
         this.data = data;
+    }
+
+    public boolean isPaga() {
+        return paga;
+    }
+
+    public void setPaga(boolean paga) {
+        this.paga = paga;
     }
 
     public int getQuantidade() {

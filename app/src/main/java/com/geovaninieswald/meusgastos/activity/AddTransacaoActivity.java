@@ -9,9 +9,12 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -22,8 +25,8 @@ import android.widget.Toast;
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.fragment.DatePickerFragment;
 import com.geovaninieswald.meusgastos.model.Categoria;
-import com.geovaninieswald.meusgastos.model.DAO.RendimentoDAO;
-import com.geovaninieswald.meusgastos.model.Rendimento;
+import com.geovaninieswald.meusgastos.model.DAO.TransacaoDAO;
+import com.geovaninieswald.meusgastos.model.Transacao;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -34,10 +37,11 @@ import java.util.Date;
 
 import faranjit.currency.edittext.CurrencyEditText;
 
-public class AddRendimentoActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
+public class AddTransacaoActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
 
     private Toolbar toolbar;
     private EditText descricao, categoria, data, quantidade;
+    private CheckBox paga;
     private CurrencyEditText valor;
     private Switch repetir;
     private Button adicionar;
@@ -46,18 +50,33 @@ public class AddRendimentoActivity extends AppCompatActivity implements View.OnC
 
     private Categoria c;
 
+    private boolean gasto;
+    private String tipoTransacao;
+
     static final int RC_CATEGORIA = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_rendimento);
+        setContentView(R.layout.activity_add_transacao);
+
+        gasto = getIntent().getBooleanExtra("gasto", false);
 
         toolbar = findViewById(R.id.toolbarID);
-        toolbar.setTitle("Adicionar Rendimento");
+
+        if (gasto) {
+            tipoTransacao = "Gasto";
+        } else {
+            tipoTransacao = "Rendimento";
+        }
+
+        toolbar.setTitle("Adicionar " + tipoTransacao);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
+
+        paga = findViewById(R.id.pagaID);
+        paga.setText(tipoTransacao + " Pago");
 
         descricao = findViewById(R.id.descricaoID);
         quantidade = findViewById(R.id.quantidadeID);
@@ -92,6 +111,28 @@ public class AddRendimentoActivity extends AppCompatActivity implements View.OnC
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (gasto) {
+            getMenuInflater().inflate(R.menu.menu_gasto_toolbar, menu);
+            return true;
+        } else {
+            return super.onCreateOptionsMenu(menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.qr_code:
+                // Colocar aqui a parte do QR Code
+                Toast.makeText(this, "hue", Toast.LENGTH_SHORT).show();
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         finish();
         return false;
@@ -114,26 +155,27 @@ public class AddRendimentoActivity extends AppCompatActivity implements View.OnC
                     }
 
                     if (descricaoStr.trim().isEmpty() || c == null || valorBD.equals(BigDecimal.valueOf(0.0))) {
-                        Toast.makeText(AddRendimentoActivity.this, "Informe todos os dados", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddTransacaoActivity.this, "Informe todos os dados", Toast.LENGTH_SHORT).show();
                     } else {
                         iniciarCarregamento();
 
-                        Rendimento r = new Rendimento();
+                        Transacao r = new Transacao();
                         r.setDescricao(descricaoStr);
                         r.setCategoria(c);
                         r.setValor(valorBD);
                         r.setData(dataD);
                         r.setQuantidade(quantidadeI);
+                        r.setPaga(paga.isChecked());
 
-                        RendimentoDAO dao = new RendimentoDAO(AddRendimentoActivity.this);
+                        TransacaoDAO dao = new TransacaoDAO(AddTransacaoActivity.this);
                         long retorno = dao.salvar(r);
 
                         if (retorno == -2) {
                             pararCarregamento();
-                            Toast.makeText(AddRendimentoActivity.this, "Rendimento já existe", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AddTransacaoActivity.this, tipoTransacao + " já existe", Toast.LENGTH_SHORT).show();
                         } else if (retorno == -1) {
                             pararCarregamento();
-                            Toast.makeText(AddRendimentoActivity.this, "Não foi possível adicionar", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AddTransacaoActivity.this, "Não foi possível adicionar o " + tipoTransacao, Toast.LENGTH_SHORT).show();
                         } else {
                             pararCarregamento();
 
@@ -144,23 +186,25 @@ public class AddRendimentoActivity extends AppCompatActivity implements View.OnC
                             data.setText(dataParaString(Calendar.getInstance()));
                             quantidade.setText("");
                             repetir.setChecked(false);
+                            paga.setChecked(false);
 
-                            Toast.makeText(AddRendimentoActivity.this, "Rendimento adicionado com sucesso", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AddTransacaoActivity.this, tipoTransacao + " adicionado com sucesso", Toast.LENGTH_SHORT).show();
                             // enviar para firebase alterar sharedPreferences sobre sincronização
                         }
                     }
                 } catch (ParseException e) {
-                    Toast.makeText(AddRendimentoActivity.this, "Não foi possível adicionar", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AddTransacaoActivity.this, "Não foi possível adicionar o " + tipoTransacao, Toast.LENGTH_SHORT).show();
                 } catch (NumberFormatException e) {
-                    Toast.makeText(AddRendimentoActivity.this, "Informe a quantidade", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AddTransacaoActivity.this, "Informe a quantidade", Toast.LENGTH_SHORT).show();
                 }
 
                 break;
             case R.id.categoriaID:
                 hideSoftKeyboard(v);
 
-                Intent intent = new Intent(AddRendimentoActivity.this, CategoriaActivity.class);
-                intent.putExtra("addRendimento", true);
+                Intent intent = new Intent(AddTransacaoActivity.this, CategoriaActivity.class);
+                intent.putExtra("transacao", true);
+                intent.putExtra("gasto", gasto);
                 startActivityForResult(intent, RC_CATEGORIA);
 
                 break;

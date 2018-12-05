@@ -16,7 +16,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
@@ -82,13 +81,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.fabGastoID:
-                    Toast.makeText(MainActivity.this, "Despesas", Toast.LENGTH_SHORT).show();
-                    //Quando estiver pronta a AddGasto
-                    //startActivity(new Intent(MainActivity.this, AddGastoActivity.class));
+                    startActivity(new Intent(MainActivity.this, AddTransacaoActivity.class).putExtra("gasto", true));
                     break;
                 case R.id.fabRendimentoID:
-                    startActivity(new Intent(MainActivity.this, AddRendimentoActivity.class));
-                    break;
+                    startActivity(new Intent(MainActivity.this, AddTransacaoActivity.class).putExtra("gasto", false));
             }
         }
     };

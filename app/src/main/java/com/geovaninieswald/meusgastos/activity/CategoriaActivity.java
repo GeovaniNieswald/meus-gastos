@@ -26,7 +26,8 @@ public class CategoriaActivity extends AppCompatActivity {
     private RecyclerView categorias;
     private RecyclerViewCategoriaAdapter adapter;
 
-    private boolean addRendimento;
+    private boolean transacao;
+    private boolean gasto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +47,11 @@ public class CategoriaActivity extends AppCompatActivity {
             }
         });
 
-        addRendimento = getIntent().getBooleanExtra("addRendimento", false);
+        transacao = getIntent().getBooleanExtra("transacao", false);
+
+        if (transacao) {
+            gasto = getIntent().getBooleanExtra("gasto", false);
+        }
 
         configurarRecycler();
     }
@@ -61,8 +66,13 @@ public class CategoriaActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        if (addRendimento) {
-            adapter = new RecyclerViewCategoriaAdapter(CategoriaActivity.this, new CategoriaDAO(this).retornarPorTipo(TipoCategoria.RENDIMENTO));
+        if (transacao) {
+            TipoCategoria tc = TipoCategoria.GASTO;
+
+            if (!gasto)
+                tc = TipoCategoria.RENDIMENTO;
+
+            adapter = new RecyclerViewCategoriaAdapter(CategoriaActivity.this, new CategoriaDAO(this).retornarPorTipo(tc));
         } else {
             adapter = new RecyclerViewCategoriaAdapter(CategoriaActivity.this, new CategoriaDAO(this).retornarTodas());
         }
