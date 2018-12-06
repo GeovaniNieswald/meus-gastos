@@ -51,7 +51,7 @@ public class TransacaoDAO {
                 cv.put("id_categoria", transacao.getCategoria().getId());
                 cv.put("valor", transacao.getValor().doubleValue());
                 cv.put("data", new SimpleDateFormat("dd/MM/yyyy").format(datas.get(count)));
-                cv.put("paga", transacao.isPaga() ? 1 : 0);
+                cv.put("paga", transacao.isPago() ? 1 : 0);
 
                 result = gatewayDB.getDatabase().insert("transacao", null, cv);
                 count++;
@@ -63,7 +63,7 @@ public class TransacaoDAO {
 
     public boolean transacaoExiste(Transacao transacao) {
         Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM transacao WHERE descricao = ? AND id_categoria = ? AND valor = ? AND data = ? AND paga = ?",
-                new String[]{transacao.getDescricao(), transacao.getCategoria().getId() + "", transacao.getValor().toString(), new SimpleDateFormat("dd/MM/yyyy").format(transacao.getData()), (transacao.isPaga() ? 1 : 0) + ""});
+                new String[]{transacao.getDescricao(), transacao.getCategoria().getId() + "", transacao.getValor().toString(), new SimpleDateFormat("dd/MM/yyyy").format(transacao.getData()), (transacao.isPago() ? 1 : 0) + ""});
 
         cursor.moveToFirst();
         int count = cursor.getCount();
@@ -87,13 +87,18 @@ public class TransacaoDAO {
             t.setValor(BigDecimal.valueOf(cursor.getDouble(2)));
             t.setData(new SimpleDateFormat("dd/MM/yyyy").parse(cursor.getString(3)));
 
-            if(cursor.getInt(4) == 1){
-                t.setPaga(true);
+            if (cursor.getInt(4) == 1) {
+                t.setPago(true);
             } else {
-                t.setPaga(false);
+                t.setPago(false);
             }
 
-            Categoria c = new Categoria(cursor.getInt(5), TipoCategoria.RENDIMENTO, cursor.getString(7));
+            TipoCategoria tc = TipoCategoria.RENDIMENTO;
+
+            if (cursor.getInt(8) == TipoCategoria.GASTO.getCodigo())
+                tc = TipoCategoria.GASTO;
+
+            Categoria c = new Categoria(cursor.getInt(5), tc, cursor.getString(7));
 
             t.setCategoria(c);
 

@@ -75,7 +75,7 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
-        paga = findViewById(R.id.pagaID);
+        paga = findViewById(R.id.pagoID);
         paga.setText(tipoTransacao + " Pago");
 
         descricao = findViewById(R.id.descricaoID);
@@ -159,16 +159,16 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
                     } else {
                         iniciarCarregamento();
 
-                        Transacao r = new Transacao();
-                        r.setDescricao(descricaoStr);
-                        r.setCategoria(c);
-                        r.setValor(valorBD);
-                        r.setData(dataD);
-                        r.setQuantidade(quantidadeI);
-                        r.setPaga(paga.isChecked());
+                        Transacao t = new Transacao();
+                        t.setDescricao(descricaoStr);
+                        t.setCategoria(c);
+                        t.setValor(valorBD);
+                        t.setData(dataD);
+                        t.setQuantidade(quantidadeI);
+                        t.setPago(paga.isChecked());
 
                         TransacaoDAO dao = new TransacaoDAO(AddTransacaoActivity.this);
-                        long retorno = dao.salvar(r);
+                        long retorno = dao.salvar(t);
 
                         if (retorno == -2) {
                             pararCarregamento();

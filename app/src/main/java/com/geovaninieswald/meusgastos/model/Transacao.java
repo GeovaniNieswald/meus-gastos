@@ -10,19 +10,19 @@ public class Transacao {
     private Categoria categoria;
     private BigDecimal valor;
     private Date data;
-    private boolean paga;
+    private boolean pago;
     private int quantidade;
 
     public Transacao() {
     }
 
-    public Transacao(int id, String descricao, Categoria categoria, BigDecimal valor, Date data, boolean paga, int quantidade) {
+    public Transacao(int id, String descricao, Categoria categoria, BigDecimal valor, Date data, boolean pago, int quantidade) {
         this.id = id;
         this.descricao = descricao;
         this.categoria = categoria;
         this.valor = valor;
         this.data = data;
-        this.paga = paga;
+        this.pago = pago;
         this.quantidade = quantidade;
     }
 
@@ -66,12 +66,12 @@ public class Transacao {
         this.data = data;
     }
 
-    public boolean isPaga() {
-        return paga;
+    public boolean isPago() {
+        return pago;
     }
 
-    public void setPaga(boolean paga) {
-        this.paga = paga;
+    public void setPago(boolean pago) {
+        this.pago = pago;
     }
 
     public int getQuantidade() {

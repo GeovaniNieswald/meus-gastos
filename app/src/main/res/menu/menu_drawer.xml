@@ -11,6 +11,7 @@
             android:title="Home" />
         <item
             android:id="@+id/nav_transacoes"
+            android:checkable="false"
             android:icon="@drawable/ic_menu_transacoes"
             android:title="Transações" />
         <item
@@ -22,7 +23,7 @@
 
     <item android:title="Relatórios">
         <menu>
-            <group android:checkableBehavior="single">
+            <group android:checkableBehavior="none">
                 <item
                     android:id="@+id/nav_rel_redimentos"
                     android:icon="@drawable/ic_menu_rendimento"
@@ -42,7 +43,7 @@
 
     <item android:title="Comunicação">
         <menu>
-            <group android:checkableBehavior="single">
+            <group android:checkableBehavior="none">
                 <item
                     android:id="@+id/nav_compartilhar"
                     android:icon="@drawable/ic_menu_compartilhar"
@@ -57,7 +58,7 @@
 
     <item android:title="Outros">
         <menu>
-            <group android:checkableBehavior="single">
+            <group android:checkableBehavior="none">
                 <item
                     android:id="@+id/nav_sobre"
                     android:icon="@drawable/ic_menu_sobre"
