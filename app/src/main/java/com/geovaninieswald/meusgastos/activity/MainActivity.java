@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ImageView imagem;
     private TextView nome, email;
     private FloatingActionMenu famMenu;
-    private com.github.clans.fab.FloatingActionButton fabReceita, fabDespesa;
+    private com.github.clans.fab.FloatingActionButton fabReceita, fabGasto;
 
     private Usuario usuario;
     private SharedFirebasePreferences preferencias;
@@ -45,9 +45,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         famMenu = findViewById(R.id.famMenuID);
         fabReceita = findViewById(R.id.fabRendimentoID);
-        fabDespesa = findViewById(R.id.fabGastoID);
+        fabGasto = findViewById(R.id.fabGastoID);
 
-        fabDespesa.setOnClickListener(clFamMenu);
+        fabGasto.setOnClickListener(clFamMenu);
         fabReceita.setOnClickListener(clFamMenu);
 
         DrawerLayout drawer = findViewById(R.id.drawerLayoutID);
@@ -79,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private View.OnClickListener clFamMenu = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            famMenu.close(true);
+
             switch (v.getId()) {
                 case R.id.fabGastoID:
                     startActivity(new Intent(MainActivity.this, AddTransacaoActivity.class).putExtra("gasto", true));

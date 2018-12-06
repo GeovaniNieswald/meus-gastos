@@ -2,12 +2,16 @@
 <resources>
     <color name="colorPrimary">#23A7D8</color>
     <color name="colorPrimaryDark">#23A7D8</color>
-    <color name="colorAccent">#FFFFFF</color>
+    <color name="colorAccent">@color/white</color>
 
-    <color name="hue">#28BFF7</color>
+    <color name="barraMes">#28BFF7</color>
     <color name="white">#FFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="gradStart">#19AA8B</color>
-    <color name="gradStop">#23A7D8</color>
+    <color name="gradStop">@color/colorPrimary</color>
     <color name="verdeEscuro">#00574B</color>
+    <color name="cinza">#C0C0C0</color>
+
+    <color name="gasto">#ff0004</color>
+    <color name="rendimento">#00FF38</color>
 </resources>

@@ -34,22 +34,8 @@
                 android:layout_height="70dp"
                 android:background="@drawable/ic_cadastro"
                 android:contentDescription="@string/cadastro"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/cadastro"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginBottom="30dp"
-                android:text="@string/cadastro"
-                android:textAlignment="center"
-                android:textColor="@color/white"
-                android:textSize="30sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/nomeID"
-                app:layout_constraintStart_toEndOf="@+id/iconeID"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText

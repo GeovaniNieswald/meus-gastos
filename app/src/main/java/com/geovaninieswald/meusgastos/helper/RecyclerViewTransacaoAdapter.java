@@ -39,16 +39,24 @@ public class RecyclerViewTransacaoAdapter extends RecyclerView.Adapter<RecyclerV
 
         if (transacoes.get(i).getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
             transacaoViewHolder.tipoTransacao.setText("Rendimento");
-            transacaoViewHolder.linha.setBackground(context.getDrawable(R.drawable.border_green));
+            transacaoViewHolder.linha.setBackground(context.getDrawable(R.drawable.border_rendimento));
         } else {
             transacaoViewHolder.tipoTransacao.setText("Gasto");
-            transacaoViewHolder.linha.setBackground(context.getDrawable(R.drawable.border_red));
+            transacaoViewHolder.linha.setBackground(context.getDrawable(R.drawable.border_gasto));
         }
 
         if(transacoes.get(i).isPago())
             transacaoViewHolder.containerPago.setVisibility(View.VISIBLE);
 
-        transacaoViewHolder.valor.setText("R$" + transacoes.get(i).getValor());
+        String valorStr = transacoes.get(i).getValor().toString();
+        valorStr = valorStr.replace(".",",");
+
+        String[] split = valorStr.split(",");
+
+        if (split[1].toString().length() == 1)
+            valorStr += "0";
+
+        transacaoViewHolder.valor.setText("R$" + valorStr);
         transacaoViewHolder.data.setText(new SimpleDateFormat("dd/MM/yyyy").format(transacoes.get(i).getData()));
 
         transacaoViewHolder.linha.setOnClickListener(new View.OnClickListener() {

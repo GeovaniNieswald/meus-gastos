@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -16,6 +15,7 @@ import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
+import com.geovaninieswald.meusgastos.helper.ItemOffsetDecoration;
 import com.geovaninieswald.meusgastos.helper.RecyclerViewCategoriaAdapter;
 import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
 
@@ -84,7 +84,21 @@ public class CategoriaActivity extends AppCompatActivity {
         categorias = findViewById(R.id.categoriasID);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         categorias.setLayoutManager(layoutManager);
-        categorias.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        ItemOffsetDecoration itemDecoration = new ItemOffsetDecoration(this, R.dimen.item_offset);
+        categorias.addItemDecoration(itemDecoration);
+
+        categorias.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && fabAdd.getVisibility() == View.VISIBLE) {
+                    fabAdd.hide();
+                } else if (dy < 0 && fabAdd.getVisibility() != View.VISIBLE) {
+                    fabAdd.show();
+                }
+            }
+        });
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override

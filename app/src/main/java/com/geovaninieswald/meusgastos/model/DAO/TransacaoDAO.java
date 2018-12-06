@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -19,9 +20,11 @@ import java.util.List;
 public class TransacaoDAO {
 
     private GatewayDB gatewayDB;
+    private SimpleDateFormat sdf;
 
     public TransacaoDAO(Context context) {
         gatewayDB = GatewayDB.getInstance(context);
+        sdf = new SimpleDateFormat("yyyy/MM/dd");
     }
 
     public long salvar(Transacao transacao) {
@@ -36,13 +39,21 @@ public class TransacaoDAO {
             long result = 0;
 
             ArrayList<Date> datas = new ArrayList<>();
+            datas.add(data);
+
             GregorianCalendar gc = new GregorianCalendar();
+            gc.setTime(data);
 
-            for (int i = 0; i < quantidade; i++) {
-                gc.setTime(data);
-                gc.roll(GregorianCalendar.MONTH, i);
+            for (int i = 1; i < quantidade; i++) {
+                if (gc.get(Calendar.MONTH) == Calendar.DECEMBER) {
+                    gc.roll(Calendar.MONTH, true);
+                    gc.roll(Calendar.YEAR, true);
+                } else {
+                    gc.roll(Calendar.MONTH, true);
+                }
 
-                datas.add(gc.getTime());
+                data = gc.getTime();
+                datas.add(data);
             }
 
             while (count < quantidade && result != -1) {
@@ -50,7 +61,7 @@ public class TransacaoDAO {
                 cv.put("descricao", transacao.getDescricao());
                 cv.put("id_categoria", transacao.getCategoria().getId());
                 cv.put("valor", transacao.getValor().doubleValue());
-                cv.put("data", new SimpleDateFormat("dd/MM/yyyy").format(datas.get(count)));
+                cv.put("data", sdf.format(datas.get(count)));
                 cv.put("paga", transacao.isPago() ? 1 : 0);
 
                 result = gatewayDB.getDatabase().insert("transacao", null, cv);
@@ -61,9 +72,13 @@ public class TransacaoDAO {
         }
     }
 
+    public int excluir(long id) {
+        return gatewayDB.getDatabase().delete("transacao", "id = ?", new String[]{id + ""});
+    }
+
     public boolean transacaoExiste(Transacao transacao) {
-        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM transacao WHERE descricao = ? AND id_categoria = ? AND valor = ? AND data = ? AND paga = ?",
-                new String[]{transacao.getDescricao(), transacao.getCategoria().getId() + "", transacao.getValor().toString(), new SimpleDateFormat("dd/MM/yyyy").format(transacao.getData()), (transacao.isPago() ? 1 : 0) + ""});
+        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM transacao WHERE descricao = ? AND id_categoria = ? AND valor = ? AND data = ?",
+                new String[]{transacao.getDescricao(), transacao.getCategoria().getId() + "", transacao.getValor().toString(), sdf.format(transacao.getData())});
 
         cursor.moveToFirst();
         int count = cursor.getCount();
@@ -75,17 +90,19 @@ public class TransacaoDAO {
         return false;
     }
 
-    public List<Transacao> retornarTodas() throws ParseException {
+    public List<Transacao> retornarPorMesAno(Date mesAno) throws ParseException {
         List<Transacao> transacoes = new ArrayList<>();
 
-        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM transacao AS t1 INNER JOIN categoria AS t2 ON (t1.id_categoria = t2.id)", null);
+        String mesAnoStr = new SimpleDateFormat("yyyy/MM/").format(mesAno) + "%";
+
+        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM transacao AS t1 INNER JOIN categoria AS t2 ON (t1.id_categoria = t2.id) WHERE data LIKE ? ORDER BY data", new String[]{mesAnoStr});
 
         while (cursor.moveToNext()) {
             Transacao t = new Transacao();
             t.setId(cursor.getInt(0));
             t.setDescricao(cursor.getString(1));
             t.setValor(BigDecimal.valueOf(cursor.getDouble(2)));
-            t.setData(new SimpleDateFormat("dd/MM/yyyy").parse(cursor.getString(3)));
+            t.setData(sdf.parse(cursor.getString(3)));
 
             if (cursor.getInt(4) == 1) {
                 t.setPago(true);

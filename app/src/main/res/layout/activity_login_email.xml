@@ -21,35 +21,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/iconeID"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:contentDescription="@string/login"
-            android:src="@drawable/ic_email"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/login"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginBottom="30dp"
-            android:text="@string/login"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/emailID"
-            app:layout_constraintStart_toEndOf="@+id/iconeID"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <EditText
             android:id="@+id/emailID"
             android:layout_width="0dp"
             android:layout_height="46dp"
-            android:layout_marginTop="50dp"
             android:ems="10"
             android:hint="E-mail"
             android:inputType="textEmailAddress"
@@ -60,7 +35,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iconeID" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/senhaID"

@@ -26,7 +26,7 @@
         android:id="@+id/containerCima"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/hue"
+        android:background="@color/barraMes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBar">
@@ -36,16 +36,16 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="40dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <Button
-                android:id="@+id/esquerdaID"
+                android:id="@+id/mesAnteriorID"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:background="@drawable/ic_arrow_left"
@@ -55,20 +55,20 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/mesID"
+                android:id="@+id/mesAnoID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dezembro de 2018"
+                android:text="MES de ANO"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/direitaID"
-                app:layout_constraintStart_toEndOf="@+id/esquerdaID"
+                app:layout_constraintEnd_toStartOf="@+id/proximoMesID"
+                app:layout_constraintStart_toEndOf="@+id/mesAnteriorID"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/direitaID"
+                android:id="@+id/proximoMesID"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:background="@drawable/ic_arrow_right"
@@ -108,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="R$300,00"
-            android:textColor="@color/verdeEscuro"
+            android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -120,9 +120,9 @@
         android:id="@+id/transacoesID"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="15dp"
         android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="15dp"
         android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
