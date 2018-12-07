@@ -53,7 +53,8 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
     private boolean gasto;
     private String tipoTransacao;
 
-    static final int RC_CATEGORIA = 0;
+    private final int RC_CATEGORIA = 0;
+    private final int RC_QRCODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +127,7 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
             case R.id.qr_code:
                 // Colocar aqui a parte do QR Code
                 Toast.makeText(this, "hue", Toast.LENGTH_SHORT).show();
+                startActivityForResult(new Intent(AddTransacaoActivity.this, QrcodeScannerActivity.class), RC_QRCODE);
                 break;
         }
 
@@ -233,6 +235,11 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
             if (resultCode == RESULT_OK) {
                 c = (Categoria) data.getSerializableExtra("categoria");
                 categoria.setText(c.getDescricao());
+            }
+        } else if(RC_QRCODE == resultCode) {
+            if (resultCode == RESULT_OK) {
+                String retorno = data.getStringExtra("data");
+                Toast.makeText(getApplicationContext(), retorno,Toast.LENGTH_SHORT).show();
             }
         }
     }
