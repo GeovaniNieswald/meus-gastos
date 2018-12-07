@@ -16,7 +16,7 @@ import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.model.Categoria;
 import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
 
-public class AddCategoriaActivity extends AppCompatActivity {
+public class AddCategoriaActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Toolbar toolbar;
     private EditText descricao;
@@ -30,21 +30,25 @@ public class AddCategoriaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_categoria);
 
+        descricao = findViewById(R.id.descricaoID);
+        rendimento = findViewById(R.id.rendimentoID);
+        carregando = findViewById(R.id.carregandoID);
+        containerMeio = findViewById(R.id.containerMeioID);
         toolbar = findViewById(R.id.toolbarID);
+        adicionar = findViewById(R.id.adicionarID);
+
         toolbar.setTitle("Adicionar Categoria");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
-        descricao = findViewById(R.id.descricaoID);
-        rendimento = findViewById(R.id.rendimentoID);
-        carregando = findViewById(R.id.carregandoID);
-        containerMeio = findViewById(R.id.containerMeioID);
+        adicionar.setOnClickListener(this);
+    }
 
-        adicionar = findViewById(R.id.adicionarID);
-        adicionar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.adicionarID:
                 if (descricao.getText().toString().trim().isEmpty()) {
                     Toast.makeText(AddCategoriaActivity.this, "Informe uma descrição", Toast.LENGTH_SHORT).show();
                 } else {
@@ -78,8 +82,7 @@ public class AddCategoriaActivity extends AppCompatActivity {
                         // enviar para firebase alterar sharedPreferences sobre sincronização
                     }
                 }
-            }
-        });
+        }
     }
 
     @Override

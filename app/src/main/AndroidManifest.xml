@@ -76,7 +76,7 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.QrcodeScannerActivity"></activity>
+        <activity android:name=".activity.QrCodeScannerActivity"></activity>
 
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"

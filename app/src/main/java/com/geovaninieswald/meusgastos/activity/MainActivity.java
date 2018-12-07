@@ -23,7 +23,7 @@ import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.geovaninieswald.meusgastos.model.Usuario;
 import com.github.clans.fab.FloatingActionMenu;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private ImageView imagem;
     private TextView nome, email;
@@ -47,8 +47,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fabReceita = findViewById(R.id.fabRendimentoID);
         fabGasto = findViewById(R.id.fabGastoID);
 
-        fabGasto.setOnClickListener(clFamMenu);
-        fabReceita.setOnClickListener(clFamMenu);
+        fabGasto.setOnClickListener(this);
+        fabReceita.setOnClickListener(this);
 
         DrawerLayout drawer = findViewById(R.id.drawerLayoutID);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -75,21 +75,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             imagem.setBackground(rbd);
         }
     }
-
-    private View.OnClickListener clFamMenu = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            famMenu.close(true);
-
-            switch (v.getId()) {
-                case R.id.fabGastoID:
-                    startActivity(new Intent(MainActivity.this, AddTransacaoActivity.class).putExtra("gasto", true));
-                    break;
-                case R.id.fabRendimentoID:
-                    startActivity(new Intent(MainActivity.this, AddTransacaoActivity.class).putExtra("gasto", false));
-            }
-        }
-    };
 
     @Override
     public void onBackPressed() {
@@ -140,5 +125,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = findViewById(R.id.drawerLayoutID);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fabGastoID:
+                famMenu.close(true);
+                startActivity(new Intent(MainActivity.this, AddTransacaoActivity.class).putExtra("gasto", true));
+                break;
+            case R.id.fabRendimentoID:
+                famMenu.close(true);
+                startActivity(new Intent(MainActivity.this, AddTransacaoActivity.class).putExtra("gasto", false));
+        }
     }
 }

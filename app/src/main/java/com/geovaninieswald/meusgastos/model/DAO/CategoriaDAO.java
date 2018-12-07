@@ -49,7 +49,7 @@ public class CategoriaDAO {
     public List<Categoria> retornarTodas() {
         List<Categoria> categorias = new ArrayList<>();
 
-        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM categoria", null);
+        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM categoria ORDER BY descricao", null);
 
         while (cursor.moveToNext()) {
             Categoria c = new Categoria();
@@ -73,7 +73,7 @@ public class CategoriaDAO {
     public List<Categoria> retornarPorTipo(TipoCategoria tc) {
         List<Categoria> categorias = new ArrayList<>();
 
-        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM categoria WHERE tipo = ?", new String[]{tc.getCodigo() + ""});
+        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM categoria WHERE tipo = ? ORDER BY descricao", new String[]{tc.getCodigo() + ""});
 
         while (cursor.moveToNext()) {
             Categoria c = new Categoria();

@@ -77,26 +77,11 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
         proximoMes.setOnClickListener(this);
         proximoMes.setOnTouchListener(onTouchListener);
 
-        fabGasto.setOnClickListener(clFamMenu);
-        fabReceita.setOnClickListener(clFamMenu);
+        fabGasto.setOnClickListener(this);
+        fabReceita.setOnClickListener(this);
 
         configurarRecycler();
     }
-
-    private View.OnClickListener clFamMenu = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            famMenu.close(true);
-
-            switch (v.getId()) {
-                case R.id.fabGastoID:
-                    startActivity(new Intent(TransacaoActivity.this, AddTransacaoActivity.class).putExtra("gasto", true));
-                    break;
-                case R.id.fabRendimentoID:
-                    startActivity(new Intent(TransacaoActivity.this, AddTransacaoActivity.class).putExtra("gasto", false));
-            }
-        }
-    };
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -140,6 +125,14 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
                 mesAnoDate = cal.getTime();
 
                 setAdapter();
+                break;
+            case R.id.fabGastoID:
+                famMenu.close(true);
+                startActivity(new Intent(TransacaoActivity.this, AddTransacaoActivity.class).putExtra("gasto", true));
+                break;
+            case R.id.fabRendimentoID:
+                famMenu.close(true);
+                startActivity(new Intent(TransacaoActivity.this, AddTransacaoActivity.class).putExtra("gasto", false));
         }
     }
 

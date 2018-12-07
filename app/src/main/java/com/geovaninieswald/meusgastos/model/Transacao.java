@@ -1,9 +1,10 @@
 package com.geovaninieswald.meusgastos.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class Transacao {
+public class Transacao implements Serializable {
 
     private int id;
     private String descricao;

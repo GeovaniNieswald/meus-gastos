@@ -13,23 +13,23 @@ public class ConexaoFirebase {
     private static FirebaseAuth autenticacao;
 
     public static DatabaseReference getDBReference(String path) {
-        if (referenciaDB == null) {
+        if (referenciaDB == null)
             referenciaDB = FirebaseDatabase.getInstance().getReference(path);
-        }
+
         return referenciaDB;
     }
 
     public static StorageReference getSTReference(String path) {
-        if (referenciaST == null) {
+        if (referenciaST == null)
             referenciaST = FirebaseStorage.getInstance().getReference(path);
-        }
+
         return referenciaST;
     }
 
     public static FirebaseAuth getFirebaseAuth() {
-        if (autenticacao == null) {
+        if (autenticacao == null)
             autenticacao = FirebaseAuth.getInstance();
-        }
+
         return autenticacao;
     }
 

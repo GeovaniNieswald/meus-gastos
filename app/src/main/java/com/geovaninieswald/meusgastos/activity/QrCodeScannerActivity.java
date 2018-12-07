@@ -24,7 +24,7 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
 
-public class QrcodeScannerActivity extends AppCompatActivity {
+public class QrCodeScannerActivity extends AppCompatActivity {
 
     SurfaceView surfaceView;
     CameraSource cameraSource;

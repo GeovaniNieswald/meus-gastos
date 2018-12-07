@@ -1,6 +1,7 @@
 package com.geovaninieswald.meusgastos.helper;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
@@ -10,10 +11,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.geovaninieswald.meusgastos.R;
+import com.geovaninieswald.meusgastos.activity.AddTransacaoActivity;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.model.Transacao;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class RecyclerViewTransacaoAdapter extends RecyclerView.Adapter<RecyclerViewTransacaoAdapter.TransacaoViewHolder> {
@@ -34,8 +35,12 @@ public class RecyclerViewTransacaoAdapter extends RecyclerView.Adapter<RecyclerV
 
     @Override
     public void onBindViewHolder(@NonNull TransacaoViewHolder transacaoViewHolder, int i) {
+        final int POSICAO = i;
+
         transacaoViewHolder.descricao.setText(transacoes.get(i).getDescricao());
         transacaoViewHolder.categoria.setText(transacoes.get(i).getCategoria().getDescricao());
+        transacaoViewHolder.valor.setText("R$" + Utils.prepararValor(transacoes.get(i).getValor()));
+        transacaoViewHolder.data.setText(Utils.dateParaString(transacoes.get(i).getData()));
 
         if (transacoes.get(i).getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
             transacaoViewHolder.tipoTransacao.setText("Rendimento");
@@ -45,24 +50,21 @@ public class RecyclerViewTransacaoAdapter extends RecyclerView.Adapter<RecyclerV
             transacaoViewHolder.linha.setBackground(context.getDrawable(R.drawable.border_gasto));
         }
 
-        if(transacoes.get(i).isPago())
+        if (transacoes.get(i).isPago())
             transacaoViewHolder.containerPago.setVisibility(View.VISIBLE);
-
-        String valorStr = transacoes.get(i).getValor().toString();
-        valorStr = valorStr.replace(".",",");
-
-        String[] split = valorStr.split(",");
-
-        if (split[1].toString().length() == 1)
-            valorStr += "0";
-
-        transacaoViewHolder.valor.setText("R$" + valorStr);
-        transacaoViewHolder.data.setText(new SimpleDateFormat("dd/MM/yyyy").format(transacoes.get(i).getData()));
 
         transacaoViewHolder.linha.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(context, AddTransacaoActivity.class);
+                intent.putExtra("transacao", transacoes.get(POSICAO));
+                intent.putExtra("alterar", true);
 
+                if (transacoes.get(POSICAO).getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
+                    context.startActivity(intent.putExtra("gasto", false));
+                } else {
+                    context.startActivity(intent.putExtra("gasto", true));
+                }
             }
         });
     }

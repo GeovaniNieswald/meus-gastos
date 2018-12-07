@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
+import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.Categoria;
 import com.geovaninieswald.meusgastos.model.Transacao;
 
@@ -20,11 +21,9 @@ import java.util.List;
 public class TransacaoDAO {
 
     private GatewayDB gatewayDB;
-    private SimpleDateFormat sdf;
 
     public TransacaoDAO(Context context) {
         gatewayDB = GatewayDB.getInstance(context);
-        sdf = new SimpleDateFormat("yyyy/MM/dd");
     }
 
     public long salvar(Transacao transacao) {
@@ -61,7 +60,7 @@ public class TransacaoDAO {
                 cv.put("descricao", transacao.getDescricao());
                 cv.put("id_categoria", transacao.getCategoria().getId());
                 cv.put("valor", transacao.getValor().doubleValue());
-                cv.put("data", sdf.format(datas.get(count)));
+                cv.put("data", Utils.dateParaStringBD(datas.get(count)));
                 cv.put("paga", transacao.isPago() ? 1 : 0);
 
                 result = gatewayDB.getDatabase().insert("transacao", null, cv);
@@ -72,13 +71,24 @@ public class TransacaoDAO {
         }
     }
 
+    public long alterar(Transacao transacao) {
+        ContentValues cv = new ContentValues();
+        cv.put("descricao", transacao.getDescricao());
+        cv.put("id_categoria", transacao.getCategoria().getId());
+        cv.put("valor", transacao.getValor().doubleValue());
+        cv.put("data", Utils.dateParaStringBD(transacao.getData()));
+        cv.put("paga", transacao.isPago() ? 1 : 0);
+
+        return gatewayDB.getDatabase().update("transacao", cv, "id = ?", new String[]{transacao.getId() + ""});
+    }
+
     public int excluir(long id) {
         return gatewayDB.getDatabase().delete("transacao", "id = ?", new String[]{id + ""});
     }
 
     public boolean transacaoExiste(Transacao transacao) {
         Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM transacao WHERE descricao = ? AND id_categoria = ? AND valor = ? AND data = ?",
-                new String[]{transacao.getDescricao(), transacao.getCategoria().getId() + "", transacao.getValor().toString(), sdf.format(transacao.getData())});
+                new String[]{transacao.getDescricao(), transacao.getCategoria().getId() + "", transacao.getValor().toString(), Utils.dateParaStringBD(transacao.getData())});
 
         cursor.moveToFirst();
         int count = cursor.getCount();
@@ -102,7 +112,7 @@ public class TransacaoDAO {
             t.setId(cursor.getInt(0));
             t.setDescricao(cursor.getString(1));
             t.setValor(BigDecimal.valueOf(cursor.getDouble(2)));
-            t.setData(sdf.parse(cursor.getString(3)));
+            t.setData(Utils.stringParaDateBD(cursor.getString(3)));
 
             if (cursor.getInt(4) == 1) {
                 t.setPago(true);

@@ -17,6 +17,7 @@ public class GatewayDB {
     protected static GatewayDB getInstance(Context context) {
         if (gatewayDB == null)
             gatewayDB = new GatewayDB(context);
+
         return gatewayDB;
     }
 
