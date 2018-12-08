@@ -9,11 +9,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
+import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
+import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
 import com.geovaninieswald.meusgastos.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -65,15 +66,14 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
                 String senha = edtSenha.getText().toString();
 
                 if (email.trim().isEmpty() || senha.trim().isEmpty()) {
-                    alerta("Você deve informar um e-mail e senha");
+                    Utils.mostrarMensagemCurta(LoginEmailActivity.this, "Você deve informar um e-mail e senha");
                 } else {
                     login(email, senha);
                 }
 
                 break;
             case R.id.novoID:
-                Intent intent = new Intent(LoginEmailActivity.this, CadastroActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(LoginEmailActivity.this, CadastroActivity.class));
         }
     }
 
@@ -97,8 +97,8 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
         });
     }
 
-    private void login(String email, String senha) {
-        iniciarCarregamento();
+    private void login(final String email, String senha) {
+        Utils.iniciarCarregamento(carregando, containerMeio, containerFim);
 
         autenticacao.signInWithEmailAndPassword(email, senha).addOnCompleteListener(LoginEmailActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -111,49 +111,26 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
                     preferencias.salvarLogin(usuario);
 
-                    // CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
+                    UsuarioDAO dao = new UsuarioDAO(LoginEmailActivity.this);
+                    long retorno = dao.salvar(usuario);
 
-                    finishAffinity();
-                    finish();
-                    startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
+                    if (retorno == -1) {
+                        Utils.pararCarregamento(carregando, containerMeio, containerFim);
+                        Utils.mostrarMensagemCurta(LoginEmailActivity.this, "Não foi possível efetuar login");
+                        ConexaoFirebase.sair();
+                        preferencias.sair();
+                    } else {
+                        // VERIFICAR SE BASE LOCAL ESTÁ SINCRONIZADA COM FIREBASE, CASO NÃO ESTEJA CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
+
+                        finishAffinity();
+                        finish();
+                        startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
+                    }
                 } else {
-                    pararCarregamento();
-
-                    alerta("Erro ao logar");
+                    Utils.pararCarregamento(carregando, containerMeio, containerFim);
+                    Utils.mostrarMensagemCurta(LoginEmailActivity.this, "Erro ao logar");
                 }
             }
         });
-    }
-
-    private void alerta(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    private void iniciarCarregamento() {
-        carregando.setVisibility(View.VISIBLE);
-
-        for (int i = 0; i < containerMeio.getChildCount(); i++) {
-            View child = containerMeio.getChildAt(i);
-            child.setEnabled(false);
-        }
-
-        for (int i = 0; i < containerFim.getChildCount(); i++) {
-            View child = containerFim.getChildAt(i);
-            child.setEnabled(false);
-        }
-    }
-
-    private void pararCarregamento() {
-        carregando.setVisibility(View.INVISIBLE);
-
-        for (int i = 0; i < containerMeio.getChildCount(); i++) {
-            View child = containerMeio.getChildAt(i);
-            child.setEnabled(true);
-        }
-
-        for (int i = 0; i < containerFim.getChildCount(); i++) {
-            View child = containerFim.getChildAt(i);
-            child.setEnabled(true);
-        }
     }
 }

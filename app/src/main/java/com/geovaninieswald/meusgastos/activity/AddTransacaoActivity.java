@@ -1,6 +1,5 @@
 package com.geovaninieswald.meusgastos.activity;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -20,7 +18,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.fragment.DatePickerFragment;
@@ -31,7 +28,6 @@ import com.geovaninieswald.meusgastos.model.Transacao;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -189,9 +185,9 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
                     }
 
                     if (descricaoStr.trim().isEmpty() || c == null || valorBD.equals(BigDecimal.valueOf(0.0))) {
-                        Toast.makeText(AddTransacaoActivity.this, "Informe todos os dados", Toast.LENGTH_SHORT).show();
+                        Utils.mostrarMensagemCurta(AddTransacaoActivity.this, "Informe todos os dados");
                     } else {
-                        iniciarCarregamento();
+                        Utils.iniciarCarregamento(carregando, containerMeio);
 
                         Transacao t = new Transacao();
                         t.setDescricao(descricaoStr);
@@ -212,15 +208,15 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
                         }
 
                         if (retorno == -2) {
-                            pararCarregamento();
-                            Toast.makeText(AddTransacaoActivity.this, tipoTransacao + " já existe", Toast.LENGTH_SHORT).show();
+                            Utils.pararCarregamento(carregando, containerMeio);
+                            Utils.mostrarMensagemCurta(AddTransacaoActivity.this, tipoTransacao + " já existe");
                         } else if (retorno == -1) {
-                            pararCarregamento();
-                            Toast.makeText(AddTransacaoActivity.this, "Não foi possível " + tipoOperacaoTxt1 + "o " + tipoTransacao, Toast.LENGTH_SHORT).show();
+                            Utils.pararCarregamento(carregando, containerMeio);
+                            Utils.mostrarMensagemCurta(AddTransacaoActivity.this, "Não foi possível " + tipoOperacaoTxt1 + "o " + tipoTransacao);
                         } else {
-                            pararCarregamento();
+                            Utils.pararCarregamento(carregando, containerMeio);
+                            Utils.mostrarMensagemCurta(AddTransacaoActivity.this, tipoTransacao + " " + tipoOperacaoTxt2 + "com sucesso");
 
-                            Toast.makeText(AddTransacaoActivity.this, tipoTransacao + " " + tipoOperacaoTxt2 + "com sucesso", Toast.LENGTH_SHORT).show();
                             // enviar para firebase alterar sharedPreferences sobre sincronização
 
                             if (alterar) {
@@ -238,14 +234,14 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
                         }
                     }
                 } catch (ParseException e) {
-                    Toast.makeText(AddTransacaoActivity.this, "Não foi possível " + tipoOperacaoTxt1 + "o " + tipoTransacao, Toast.LENGTH_SHORT).show();
+                    Utils.mostrarMensagemCurta(AddTransacaoActivity.this, "Não foi possível " + tipoOperacaoTxt1 + "o " + tipoTransacao);
                 } catch (NumberFormatException e) {
-                    Toast.makeText(AddTransacaoActivity.this, "Informe a quantidade", Toast.LENGTH_SHORT).show();
+                    Utils.mostrarMensagemCurta(AddTransacaoActivity.this, "Informe a quantidade");
                 }
 
                 break;
             case R.id.categoriaID:
-                hideSoftKeyboard(v);
+                Utils.hideSoftKeyboard(AddTransacaoActivity.this, v);
 
                 Intent intent = new Intent(AddTransacaoActivity.this, CategoriaActivity.class);
                 intent.putExtra("transacao", true);
@@ -255,7 +251,7 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
                 break;
             case R.id.dataID:
                 try {
-                    hideSoftKeyboard(v);
+                    Utils.hideSoftKeyboard(AddTransacaoActivity.this, v);
 
                     DialogFragment datePicker = new DatePickerFragment();
                     ((DatePickerFragment) datePicker).setData(Utils.stringParaDate(data.getText().toString()));
@@ -281,40 +277,17 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (RC_CATEGORIA == requestCode) {
-            if (resultCode == RESULT_OK) {
-                c = (Categoria) data.getSerializableExtra("categoria");
-                categoria.setText(c.getDescricao());
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case RC_CATEGORIA:
+                    c = (Categoria) data.getSerializableExtra("categoria");
+                    categoria.setText(c.getDescricao());
+                    break;
+                case RC_QRCODE:
+                    String retorno = data.getStringExtra("data");
+                    Utils.mostrarMensagemCurta(AddTransacaoActivity.this, retorno);
+                    // Fazer funcionar
             }
-        } else if (RC_QRCODE == resultCode) {
-            if (resultCode == RESULT_OK) {
-                String retorno = data.getStringExtra("data");
-                Toast.makeText(getApplicationContext(), retorno, Toast.LENGTH_SHORT).show();
-                // Fazer funcionar
-            }
-        }
-    }
-
-    private void hideSoftKeyboard(View view) {
-        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-    }
-
-    private void iniciarCarregamento() {
-        carregando.setVisibility(View.VISIBLE);
-
-        for (int i = 0; i < containerMeio.getChildCount(); i++) {
-            View child = containerMeio.getChildAt(i);
-            child.setEnabled(false);
-        }
-    }
-
-    private void pararCarregamento() {
-        carregando.setVisibility(View.INVISIBLE);
-
-        for (int i = 0; i < containerMeio.getChildCount(); i++) {
-            View child = containerMeio.getChildAt(i);
-            child.setEnabled(true);
         }
     }
 }

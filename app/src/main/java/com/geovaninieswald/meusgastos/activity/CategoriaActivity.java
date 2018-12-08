@@ -11,12 +11,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
-import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.helper.ItemOffsetDecoration;
 import com.geovaninieswald.meusgastos.helper.RecyclerViewCategoriaAdapter;
+import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
 
 public class CategoriaActivity extends AppCompatActivity {
@@ -35,11 +35,13 @@ public class CategoriaActivity extends AppCompatActivity {
         setContentView(R.layout.activity_categoria);
 
         toolbar = findViewById(R.id.toolbarID);
+        fabAdd = findViewById(R.id.fabAddID);
+        categorias = findViewById(R.id.categoriasID);
+
         toolbar.setTitle("Categorias");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        fabAdd = findViewById(R.id.fabAddID);
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,7 +83,6 @@ public class CategoriaActivity extends AppCompatActivity {
     }
 
     private void configurarRecycler() {
-        categorias = findViewById(R.id.categoriasID);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         categorias.setLayoutManager(layoutManager);
 
@@ -92,6 +93,7 @@ public class CategoriaActivity extends AppCompatActivity {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
                 if (dy > 0 && fabAdd.getVisibility() == View.VISIBLE) {
                     fabAdd.hide();
                 } else if (dy < 0 && fabAdd.getVisibility() != View.VISIBLE) {
@@ -123,9 +125,9 @@ public class CategoriaActivity extends AppCompatActivity {
                                 if (numItens > 0) {
                                     adapter.removerCategoria(POSICAO);
                                     // Excluir do firebase
-                                    Toast.makeText(CategoriaActivity.this, "Categoria Excluida", Toast.LENGTH_SHORT).show();
+                                    Utils.mostrarMensagemCurta(CategoriaActivity.this, "Categoria Excluida");
                                 } else {
-                                    Toast.makeText(CategoriaActivity.this, "Não foi possível excluir a categoria", Toast.LENGTH_SHORT).show();
+                                    Utils.mostrarMensagemCurta(CategoriaActivity.this, "Não foi possível excluir a categoria");
                                 }
                             }
                         })

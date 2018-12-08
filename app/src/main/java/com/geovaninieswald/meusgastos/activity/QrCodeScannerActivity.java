@@ -12,9 +12,7 @@ import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.google.android.gms.vision.CameraSource;
@@ -26,17 +24,18 @@ import java.io.IOException;
 
 public class QrCodeScannerActivity extends AppCompatActivity {
 
-    SurfaceView surfaceView;
-    CameraSource cameraSource;
-    TextView textView;
-    BarcodeDetector barcodeDetector;
+    private SurfaceView surfaceView;
+    private CameraSource cameraSource;
+    private TextView textView;
+    private BarcodeDetector barcodeDetector;
 
-    Context context;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrcode_scanner);
+
         surfaceView = findViewById(R.id.camerapreview);
         textView = findViewById(R.id.textview);
 
@@ -49,28 +48,25 @@ public class QrCodeScannerActivity extends AppCompatActivity {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-
                     return;
                 }
                 try {
                     cameraSource.start(holder);
                 } catch (IOException e) {
-                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
+                    // Tratar
                 }
             }
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
             }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-
                 cameraSource.stop();
             }
         });
+
         barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
             public void release() {
@@ -88,19 +84,14 @@ public class QrCodeScannerActivity extends AppCompatActivity {
                             Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
                             vibrator.vibrate(1000);
 
-
                             Intent resultIntent = new Intent();
                             resultIntent.putExtra("data", qrcodes.valueAt(0).displayValue);
-                            ((Activity)context).setResult(RESULT_OK, resultIntent);
-                            ((Activity)context).finish();
+                            ((Activity) context).setResult(RESULT_OK, resultIntent);
+                            ((Activity) context).finish();
                         }
                     });
                 }
             }
         });
-
-
     }
-
-
 }

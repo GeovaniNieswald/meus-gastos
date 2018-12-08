@@ -16,10 +16,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
+import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
 import com.geovaninieswald.meusgastos.model.Usuario;
@@ -122,7 +122,7 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
                 try {
                     exibirImagem(MediaStore.Images.Media.getBitmap(getContentResolver(), uriImagem));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    // Tratar
                 }
             }
         }
@@ -141,11 +141,11 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
         String confirmarSenha = edtConfirmarSenha.getText().toString();
 
         if (nome.trim().isEmpty() || email.trim().isEmpty() || senha.trim().isEmpty() || confirmarSenha.trim().isEmpty()) {
-            alerta("Insira todos os dados");
+            Utils.mostrarMensagemCurta(CadastroActivity.this, "Insira todos os dados");
         } else {
             if (senha.equals(confirmarSenha)) {
                 if (++controle == 1 && uriImagem == null) {
-                    alerta("Você pode escolher uma imagem, basta tocar no icone");
+                    Utils.mostrarMensagemCurta(CadastroActivity.this, "Você pode escolher uma imagem, basta tocar no icone");
                     icone.setBackground(getDrawable(R.drawable.ic_cadastro_alerta));
                     HANDLER.postDelayed(RUNNABLE, 4000);
                 } else {
@@ -153,13 +153,13 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
                     firebaseAuthWithEmailAndPassword(email, senha);
                 }
             } else {
-                alerta("Senhas informadas não correspondem");
+                Utils.mostrarMensagemCurta(CadastroActivity.this, "Senhas informadas não correspondem");
             }
         }
     }
 
     private void firebaseAuthWithEmailAndPassword(String email, String senha) {
-        iniciarCarregamento();
+        Utils.iniciarCarregamento(carregando, containerMeio);
 
         autenticacao.createUserWithEmailAndPassword(email, senha).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -167,7 +167,7 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
                 if (task.isSuccessful()) {
                     enviarImagem();
                 } else {
-                    pararCarregamento();
+                    Utils.pararCarregamento(carregando, containerMeio);
 
                     String erro = "";
 
@@ -183,7 +183,7 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
                         erro = "Erro ao cadastrar";
                     }
 
-                    alerta(erro);
+                    Utils.mostrarMensagemCurta(CadastroActivity.this, erro);
                 }
             }
         });
@@ -215,39 +215,31 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
         usuario.setId(autenticacao.getCurrentUser().getUid());
         preferencias.salvarLogin(usuario);
 
-        if (referenciaDB.child(usuario.getId()).setValue(usuario).isSuccessful()) {
-            preferencias.salvarStatusSincronia(true);
-        } else {
-            preferencias.salvarStatusSincronia(false);
-        }
+        referenciaDB.child(usuario.getId()).setValue(usuario).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()){
+                    preferencias.salvarStatusSincronia(true);
 
-        UsuarioDAO dao = new UsuarioDAO(CadastroActivity.this);
-        dao.salvar(usuario);
+                    UsuarioDAO dao = new UsuarioDAO(CadastroActivity.this);
+                    long retorno = dao.salvar(usuario);
 
-        finishAffinity();
-        finish();
-        startActivity(new Intent(CadastroActivity.this, MainActivity.class));
-    }
-
-    private void alerta(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    private void iniciarCarregamento() {
-        carregando.setVisibility(View.VISIBLE);
-
-        for (int i = 0; i < containerMeio.getChildCount(); i++) {
-            View child = containerMeio.getChildAt(i);
-            child.setEnabled(false);
-        }
-    }
-
-    private void pararCarregamento() {
-        carregando.setVisibility(View.INVISIBLE);
-
-        for (int i = 0; i < containerMeio.getChildCount(); i++) {
-            View child = containerMeio.getChildAt(i);
-            child.setEnabled(true);
-        }
+                    if (retorno == -1) {
+                        Utils.pararCarregamento(carregando, containerMeio);
+                        Utils.mostrarMensagemCurta(CadastroActivity.this, "Não foi possível efetuar o cadastro");
+                        ConexaoFirebase.sair();
+                        preferencias.sair();
+                    } else {
+                        finishAffinity();
+                        finish();
+                        startActivity(new Intent(CadastroActivity.this, MainActivity.class));
+                    }
+                } else {
+                    Utils.mostrarMensagemCurta(CadastroActivity.this, "Não foi possível efetuar o cadastro");
+                    ConexaoFirebase.sair();
+                    preferencias.sair();
+                }
+            }
+        });
     }
 }

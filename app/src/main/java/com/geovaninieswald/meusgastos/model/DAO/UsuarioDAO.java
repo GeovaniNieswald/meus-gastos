@@ -14,9 +14,9 @@ public class UsuarioDAO {
         gatewayDB = GatewayDB.getInstance(context);
     }
 
-    public void salvar(Usuario usuario) {
+    public long salvar(Usuario usuario) {
         if (usuarioExiste(usuario.getId())) {
-            alterar(usuario);
+            return alterar(usuario);
         } else {
             ContentValues cv = new ContentValues();
             cv.put("id", usuario.getId());
@@ -24,18 +24,18 @@ public class UsuarioDAO {
             cv.put("imagem", usuario.getImagem());
             cv.put("email", usuario.getEmail());
 
-            gatewayDB.getDatabase().insert("usuario", null, cv);
+            return gatewayDB.getDatabase().insert("usuario", null, cv);
         }
     }
 
-    public void alterar(Usuario usuario) {
+    public long alterar(Usuario usuario) {
         ContentValues cv = new ContentValues();
         cv.put("id", usuario.getId());
         cv.put("nome", usuario.getNome());
         cv.put("imagem", usuario.getImagem());
         cv.put("email", usuario.getEmail());
 
-        gatewayDB.getDatabase().update("usuario", cv, "id = ?", new String[]{usuario.getId()});
+        return gatewayDB.getDatabase().update("usuario", cv, "id = ?", new String[]{usuario.getId()});
     }
 
     public boolean usuarioExiste(String id) {

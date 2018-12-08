@@ -9,10 +9,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
+import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.Categoria;
 import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
 
@@ -50,9 +50,9 @@ public class AddCategoriaActivity extends AppCompatActivity implements View.OnCl
         switch (v.getId()) {
             case R.id.adicionarID:
                 if (descricao.getText().toString().trim().isEmpty()) {
-                    Toast.makeText(AddCategoriaActivity.this, "Informe uma descrição", Toast.LENGTH_SHORT).show();
+                    Utils.mostrarMensagemCurta(AddCategoriaActivity.this, "Informe uma descrição");
                 } else {
-                    iniciarCarregamento();
+                    Utils.iniciarCarregamento(carregando, containerMeio);
 
                     Categoria c = new Categoria();
                     c.setDescricao(descricao.getText().toString());
@@ -67,18 +67,19 @@ public class AddCategoriaActivity extends AppCompatActivity implements View.OnCl
                     long retorno = dao.salvar(c);
 
                     if (retorno == -2) {
-                        pararCarregamento();
-                        Toast.makeText(AddCategoriaActivity.this, "Categoria já existe", Toast.LENGTH_SHORT).show();
+                        Utils.pararCarregamento(carregando, containerMeio);
+                        Utils.mostrarMensagemCurta(AddCategoriaActivity.this, "Categoria já existe");
                     } else if (retorno == -1) {
-                        pararCarregamento();
-                        Toast.makeText(AddCategoriaActivity.this, "Não foi possível adicionar", Toast.LENGTH_SHORT).show();
+                        Utils.pararCarregamento(carregando, containerMeio);
+                        Utils.mostrarMensagemCurta(AddCategoriaActivity.this, "Não foi possível adicionar");
                     } else {
-                        pararCarregamento();
+                        Utils.pararCarregamento(carregando, containerMeio);
 
                         descricao.setText("");
                         rendimento.setChecked(true);
 
-                        Toast.makeText(AddCategoriaActivity.this, "Categoria adicionada com sucesso", Toast.LENGTH_SHORT).show();
+                        Utils.mostrarMensagemCurta(AddCategoriaActivity.this, "Categoria adicionada com sucesso");
+
                         // enviar para firebase alterar sharedPreferences sobre sincronização
                     }
                 }
@@ -89,23 +90,5 @@ public class AddCategoriaActivity extends AppCompatActivity implements View.OnCl
     public boolean onSupportNavigateUp() {
         finish();
         return false;
-    }
-
-    private void iniciarCarregamento() {
-        carregando.setVisibility(View.VISIBLE);
-
-        for (int i = 0; i < containerMeio.getChildCount(); i++) {
-            View child = containerMeio.getChildAt(i);
-            child.setEnabled(false);
-        }
-    }
-
-    private void pararCarregamento() {
-        carregando.setVisibility(View.INVISIBLE);
-
-        for (int i = 0; i < containerMeio.getChildCount(); i++) {
-            View child = containerMeio.getChildAt(i);
-            child.setEnabled(true);
-        }
     }
 }

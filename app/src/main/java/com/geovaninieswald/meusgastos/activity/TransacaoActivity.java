@@ -20,6 +20,7 @@ import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.helper.ItemOffsetDecoration;
 import com.geovaninieswald.meusgastos.helper.RecyclerViewTransacaoAdapter;
+import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.DAO.TransacaoDAO;
 import com.geovaninieswald.meusgastos.model.Transacao;
 import com.github.clans.fab.FloatingActionMenu;
@@ -38,10 +39,8 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
     private Toolbar toolbar;
     private FloatingActionMenu famMenu;
     private com.github.clans.fab.FloatingActionButton fabReceita, fabGasto;
-
     private TextView mesAno, total;
     private Button mesAnterior, proximoMes;
-
     private RecyclerView transacoes;
     private RecyclerViewTransacaoAdapter adapter;
 
@@ -58,19 +57,17 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
         cal = new GregorianCalendar();
 
         toolbar = findViewById(R.id.toolbarID);
-        toolbar.setTitle("Transações");
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         famMenu = findViewById(R.id.famMenuID);
         fabReceita = findViewById(R.id.fabRendimentoID);
         fabGasto = findViewById(R.id.fabGastoID);
-
         total = findViewById(R.id.totalID);
-
         mesAnterior = findViewById(R.id.mesAnteriorID);
         mesAno = findViewById(R.id.mesAnoID);
         proximoMes = findViewById(R.id.proximoMesID);
+
+        toolbar.setTitle("Transações");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mesAnterior.setOnClickListener(this);
         mesAnterior.setOnTouchListener(onTouchListener);
@@ -150,13 +147,7 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
                 }
             }
 
-            String totalStr = totalBD.toString().replace(".", ",");
-            totalStr = totalStr.replace("-", "");
-            String[] split = totalStr.split(",");
-            if (split[1].toString().length() == 1)
-                totalStr += "0";
-
-            total.setText("R$" + totalStr);
+            total.setText("R$" + Utils.prepararValor(totalBD));
 
             switch (totalBD.compareTo(BigDecimal.valueOf(0.0))) {
                 case 0:
@@ -169,7 +160,8 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
                     total.setTextColor(getResources().getColor(R.color.gasto));
             }
 
-            mesAno.setText(primeriaLetraMaiuscula(new SimpleDateFormat("MMMM 'de' yyyy", local).format(mesAnoDate)));
+            mesAno.setText(Utils.primeriaLetraMaiuscula(new SimpleDateFormat("MMMM 'de' yyyy", local).format(mesAnoDate)));
+
             adapter = new RecyclerViewTransacaoAdapter(TransacaoActivity.this, transacoesList);
             transacoes.setAdapter(adapter);
         } catch (ParseException e) {
@@ -255,12 +247,6 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
         itemTouchHelper.attachToRecyclerView(transacoes);
     }
 
-    private String primeriaLetraMaiuscula(String str) {
-        String s1 = str.substring(0, 1).toUpperCase();
-        str = s1 + str.substring(1);
-        return str;
-    }
-
     private View.OnTouchListener onTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
@@ -276,6 +262,7 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
                     break;
                 }
             }
+
             return false;
         }
     };

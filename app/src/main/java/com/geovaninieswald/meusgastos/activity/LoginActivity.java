@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -23,6 +22,7 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
+import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
 import com.geovaninieswald.meusgastos.model.Usuario;
@@ -51,7 +51,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
     private Button btnLoginGoogle, btnLoginFacebook, btnLoginEmail;
     private ProgressBar carregando;
-    private ConstraintLayout containerCentral;
+    private ConstraintLayout containerMeio;
 
     private SharedFirebasePreferences preferencias;
     private GoogleSignInClient mGoogleSignInClient;
@@ -95,12 +95,12 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
             @Override
             public void onCancel() {
-                alerta("Login cancelado");
+                Utils.mostrarMensagemCurta(LoginActivity.this, "Login cancelado");
             }
 
             @Override
             public void onError(FacebookException exception) {
-                alerta("Erro ao fazer login");
+                Utils.mostrarMensagemCurta(LoginActivity.this, "Erro ao fazer login");
             }
         });
 
@@ -108,7 +108,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         btnLoginFacebook = findViewById(R.id.loginFaceID);
         btnLoginEmail = findViewById(R.id.loginEmailID);
         carregando = findViewById(R.id.carregandoID);
-        containerCentral = findViewById(R.id.containerCentralID);
+        containerMeio = findViewById(R.id.containerMeioID);
 
         btnLoginGoogle.setOnClickListener(this);
         btnLoginFacebook.setOnClickListener(this);
@@ -146,7 +146,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             try {
                 firebaseAuthWithGoogle(task.getResult(ApiException.class));
             } catch (ApiException e) {
-                alerta("Erro ao fazer login");
+                Utils.mostrarMensagemCurta(LoginActivity.this, "Erro ao fazer login");
             }
         } else {
             callbackManager.onActivityResult(requestCode, resultCode, data);
@@ -162,7 +162,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     }
 
     private void login(AuthCredential credential) {
-        iniciarCarregamento();
+        Utils.iniciarCarregamento(carregando, containerMeio);
 
         autenticacao.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -171,11 +171,12 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                     FirebaseUser usuarioFirebase = autenticacao.getCurrentUser();
 
                     String urlImagem = usuarioFirebase.getPhotoUrl().toString();
-                    urlImagem = urlImagem.replace("/s96-c/", "/s70-c/");
 
                     for (UserInfo profile : usuarioFirebase.getProviderData()) {
                         if (FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
                             urlImagem = "https://graph.facebook.com/" + profile.getUid() + "/picture?height=70";
+                        } else if (GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
+                            urlImagem = urlImagem.replace("/s96-c/", "/s70-c/");
                         }
                     }
 
@@ -184,21 +185,33 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
                     preferencias.salvarLogin(usuario);
 
-                    if (referenciaDB.child(usuario.getId()).setValue(usuario).isSuccessful()) {
-                        preferencias.salvarStatusSincronia(true);
-                    } else {
-                        preferencias.salvarStatusSincronia(false);
-                    }
+                    referenciaDB.child(usuario.getId()).setValue(usuario).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> pao) {
+                            if (pao.isSuccessful()) {
+                                UsuarioDAO dao = new UsuarioDAO(LoginActivity.this);
+                                long retorno = dao.salvar(usuario);
 
-                    UsuarioDAO dao = new UsuarioDAO(LoginActivity.this);
-                    dao.salvar(usuario);
+                                if (retorno == -1) {
+                                    Utils.pararCarregamento(carregando, containerMeio);
+                                    Utils.mostrarMensagemCurta(LoginActivity.this, "Não foi possível efetuar login");
+                                    ConexaoFirebase.sair();
+                                    preferencias.sair();
+                                } else {
+                                    // VERIFICAR SE BASE LOCAL ESTÁ SINCRONIZADA COM FIREBASE, CASO NÃO ESTEJA CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
 
-                    // CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
-
-                    finish();
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                    finish();
+                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                }
+                            } else {
+                                Utils.mostrarMensagemCurta(LoginActivity.this, "Não foi possível efetuar login");
+                                ConexaoFirebase.sair();
+                                preferencias.sair();
+                            }
+                        }
+                    });
                 } else {
-                    pararCarregamento();
+                    Utils.pararCarregamento(carregando, containerMeio);
 
                     String erro = "";
 
@@ -210,14 +223,10 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         erro = "Erro ao fazer login";
                     }
 
-                    alerta(erro);
+                    Utils.mostrarMensagemCurta(LoginActivity.this, erro);
                 }
             }
         });
-    }
-
-    private void alerta(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     private void keyHash() {
@@ -229,24 +238,6 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
             }
         } catch (PackageManager.NameNotFoundException | NoSuchAlgorithmException e) {
-        }
-    }
-
-    private void iniciarCarregamento() {
-        carregando.setVisibility(View.VISIBLE);
-
-        for (int i = 0; i < containerCentral.getChildCount(); i++) {
-            View child = containerCentral.getChildAt(i);
-            child.setEnabled(false);
-        }
-    }
-
-    private void pararCarregamento() {
-        carregando.setVisibility(View.INVISIBLE);
-
-        for (int i = 0; i < containerCentral.getChildCount(); i++) {
-            View child = containerCentral.getChildAt(i);
-            child.setEnabled(true);
         }
     }
 }

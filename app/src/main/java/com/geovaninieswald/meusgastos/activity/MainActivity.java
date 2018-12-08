@@ -28,6 +28,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ImageView imagem;
     private TextView nome, email;
     private FloatingActionMenu famMenu;
+    private Toolbar toolbar;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
     private com.github.clans.fab.FloatingActionButton fabReceita, fabGasto;
 
     private Usuario usuario;
@@ -38,24 +41,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        preferencias = new SharedFirebasePreferences(MainActivity.this);
-
-        Toolbar toolbar = findViewById(R.id.toolbarID);
-        setSupportActionBar(toolbar);
-
+        toolbar = findViewById(R.id.toolbarID);
         famMenu = findViewById(R.id.famMenuID);
         fabReceita = findViewById(R.id.fabRendimentoID);
         fabGasto = findViewById(R.id.fabGastoID);
+        drawer = findViewById(R.id.drawerLayoutID);
+        navigationView = findViewById(R.id.navViewID);
+
+        setSupportActionBar(toolbar);
 
         fabGasto.setOnClickListener(this);
         fabReceita.setOnClickListener(this);
 
-        DrawerLayout drawer = findViewById(R.id.drawerLayoutID);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.navViewID);
         navigationView.setNavigationItemSelectedListener(this);
 
         View headerView = navigationView.getHeaderView(0);
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         nome = headerView.findViewById(R.id.nomeID);
         email = headerView.findViewById(R.id.emailID);
 
+        preferencias = new SharedFirebasePreferences(MainActivity.this);
         usuario = preferencias.usuarioLogado();
 
         nome.setText(usuario.getNome());
@@ -78,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawerLayoutID);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
