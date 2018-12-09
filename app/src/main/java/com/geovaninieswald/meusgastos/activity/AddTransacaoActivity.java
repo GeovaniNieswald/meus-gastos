@@ -286,7 +286,7 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
                 case RC_QRCODE:
                     String retorno = data.getStringExtra("data");
                     Utils.mostrarMensagemCurta(AddTransacaoActivity.this, retorno);
-                    // Fazer funcionar
+                    // pegar dados do qr code lido e colocar nos campos
             }
         }
     }

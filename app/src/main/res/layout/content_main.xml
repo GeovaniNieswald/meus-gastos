@@ -10,6 +10,64 @@
     tools:context=".activity.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/containerCima"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/barraMes"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBar">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/containerCimaCentral"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginBottom="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Button
+                android:id="@+id/mesAnteriorID"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="@drawable/ic_arrow_left"
+                android:textAllCaps="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/mesAnoID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MES de ANO"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/proximoMesID"
+                app:layout_constraintStart_toEndOf="@+id/mesAnteriorID"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/proximoMesID"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="@drawable/ic_arrow_right"
+                android:textAllCaps="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
+
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/famMenuID"
         android:layout_width="wrap_content"

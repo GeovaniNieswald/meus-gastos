@@ -9,6 +9,7 @@ import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -24,9 +25,9 @@ import java.io.IOException;
 
 public class QrCodeScannerActivity extends AppCompatActivity {
 
+    private Toolbar toolbar;
     private SurfaceView surfaceView;
     private CameraSource cameraSource;
-    private TextView textView;
     private BarcodeDetector barcodeDetector;
 
     private Context context;
@@ -36,10 +37,14 @@ public class QrCodeScannerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrcode_scanner);
 
+        toolbar = findViewById(R.id.toolbarID);
         surfaceView = findViewById(R.id.camerapreview);
-        textView = findViewById(R.id.textview);
 
-        context = getApplicationContext();
+        toolbar.setTitle("Leitor de QR Code");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        context = QrCodeScannerActivity.this;
 
         barcodeDetector = new BarcodeDetector.Builder(this).setBarcodeFormats(Barcode.QR_CODE).build();
         cameraSource = new CameraSource.Builder(this, barcodeDetector).setRequestedPreviewSize(1368, 728).setAutoFocusEnabled(true).build();
@@ -50,6 +55,7 @@ public class QrCodeScannerActivity extends AppCompatActivity {
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
+
                 try {
                     cameraSource.start(holder);
                 } catch (IOException e) {
@@ -78,20 +84,21 @@ public class QrCodeScannerActivity extends AppCompatActivity {
                 final SparseArray<Barcode> qrcodes = detections.getDetectedItems();
 
                 if (qrcodes.size() != 0) {
-                    textView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
-                            vibrator.vibrate(1000);
+                    Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+                    vibrator.vibrate(1000);
 
-                            Intent resultIntent = new Intent();
-                            resultIntent.putExtra("data", qrcodes.valueAt(0).displayValue);
-                            ((Activity) context).setResult(RESULT_OK, resultIntent);
-                            ((Activity) context).finish();
-                        }
-                    });
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("data", qrcodes.valueAt(0).displayValue);
+                    ((Activity) context).setResult(RESULT_OK, resultIntent);
+                    ((Activity) context).finish();
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }
