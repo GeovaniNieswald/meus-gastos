@@ -41,6 +41,7 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
     private com.github.clans.fab.FloatingActionButton fabReceita, fabGasto;
     private TextView mesAno, total;
     private Button mesAnterior, proximoMes;
+
     private RecyclerView transacoes;
     private RecyclerViewTransacaoAdapter adapter;
 
@@ -56,6 +57,7 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
         local = new Locale("pt", "BR");
         cal = new GregorianCalendar();
 
+        transacoes = findViewById(R.id.transacoesID);
         toolbar = findViewById(R.id.toolbarID);
         famMenu = findViewById(R.id.famMenuID);
         fabReceita = findViewById(R.id.fabRendimentoID);
@@ -134,16 +136,20 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void setAdapter() {
+        mesAno.setText(Utils.primeriaLetraMaiuscula(new SimpleDateFormat("MMMM 'de' yyyy", local).format(mesAnoDate)));
+
         try {
             List<Transacao> transacoesList = new TransacaoDAO(this).retornarPorMesAno(mesAnoDate);
 
             BigDecimal totalBD = BigDecimal.valueOf(0.0);
 
             for (Transacao t : transacoesList) {
-                if (t.getCategoria().getTipoCategoria() == TipoCategoria.GASTO) {
-                    totalBD = totalBD.subtract(t.getValor());
-                } else if (t.getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
-                    totalBD = totalBD.add(t.getValor());
+                if (t.isPago()) {
+                    if (t.getCategoria().getTipoCategoria() == TipoCategoria.GASTO) {
+                        totalBD = totalBD.subtract(t.getValor());
+                    } else if (t.getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
+                        totalBD = totalBD.add(t.getValor());
+                    }
                 }
             }
 
@@ -160,8 +166,6 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
                     total.setTextColor(getResources().getColor(R.color.gasto));
             }
 
-            mesAno.setText(Utils.primeriaLetraMaiuscula(new SimpleDateFormat("MMMM 'de' yyyy", local).format(mesAnoDate)));
-
             adapter = new RecyclerViewTransacaoAdapter(TransacaoActivity.this, transacoesList);
             transacoes.setAdapter(adapter);
         } catch (ParseException e) {
@@ -170,7 +174,6 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void configurarRecycler() {
-        transacoes = findViewById(R.id.transacoesID);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         transacoes.setLayoutManager(layoutManager);
 
@@ -211,6 +214,7 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
 
                                 if (numItens > 0) {
                                     adapter.removerTransacao(POSICAO);
+                                    setAdapter();
                                     // Excluir do firebase
                                     Toast.makeText(TransacaoActivity.this, "Transação Excluida", Toast.LENGTH_SHORT).show();
                                 } else {
