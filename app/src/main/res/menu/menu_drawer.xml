@@ -32,11 +32,6 @@
                     android:id="@+id/nav_rel_gastos"
                     android:icon="@drawable/ic_menu_gasto"
                     android:title="Gastos" />
-
-                <item
-                    android:id="@+id/nav_rel_calendario"
-                    android:icon="@drawable/ic_menu_calendario"
-                    android:title="Calendário" />
             </group>
         </menu>
     </item>

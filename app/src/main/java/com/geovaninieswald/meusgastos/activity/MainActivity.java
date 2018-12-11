@@ -1,10 +1,14 @@
 package com.geovaninieswald.meusgastos.activity;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -24,6 +28,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,6 +65,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private com.github.clans.fab.FloatingActionButton fabReceita, fabGasto;
+    private ProgressBar barraSaldo;
+
+    private Dialog sobreDialog;
+    private TextView versao;
+    private ImageView close;
 
     private ConstraintLayout containerBaixo;
     private ScrollView containerScroll;
@@ -82,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         local = new Locale("pt", "BR");
         cal = new GregorianCalendar();
 
+        barraSaldo = findViewById(R.id.barraSaldoID);
         containerScroll = findViewById(R.id.containerScrollID);
         valorSaldoDia = findViewById(R.id.valorSaldoDiaID);
         saldoDia = findViewById(R.id.saldoDiaID);
@@ -136,6 +147,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Esconder fab quando descer scroll, mostrar quando subir
 
+        sobreDialog = new Dialog(this);
+
         configurarRecycler();
     }
 
@@ -177,13 +190,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_rel_gastos:
                 break;
-            case R.id.nav_rel_calendario:
-                break;
             case R.id.nav_compartilhar:
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                String corpo = "Aplicativo Meus Gastos, baixe na Google Play Store - link";
+                intent.putExtra(Intent.EXTRA_TEXT, corpo);
+                startActivity(Intent.createChooser(intent, "Compartilhar"));
                 break;
             case R.id.nav_avaliar:
+                Utils.mostrarMensagemCurta(MainActivity.this, "Função ainda não disponível");
                 break;
             case R.id.nav_sobre:
+                sobreDialog.setContentView(R.layout.popup_sobre);
+                versao = sobreDialog.findViewById(R.id.versaoID);
+                close = sobreDialog.findViewById(R.id.closeID);
+
+                try {
+                    versao.setText("Versão do Aplicativo: " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+                } catch (PackageManager.NameNotFoundException e) {
+                    // Tratar
+                }
+
+                close.setOnClickListener(this);
+
+                sobreDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                sobreDialog.show();
                 break;
             case R.id.nav_sair:
                 // VERIFICAR SE ESTÁ SINCRONIZADO, CASO NÃO, AVISAR QUE O USUÁRIO PERDERÁ DADOS, CONFIRMAÇÃO EM AMBOS OS CASOS
@@ -233,6 +264,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.fabRendimentoID:
                 famMenu.close(true);
                 startActivity(new Intent(MainActivity.this, AddTransacaoActivity.class).putExtra("gasto", false));
+                break;
+            case R.id.closeID:
+                sobreDialog.dismiss();
         }
     }
 
@@ -273,6 +307,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             valorTotal = valorRendimentos.subtract(valorGastos);
+
+            BigDecimal aux1 = valorRendimentos;
+            BigDecimal aux2 = valorGastos;
+            BigDecimal aux3 = aux1.add(aux2);
+
+            if (aux3.compareTo(BigDecimal.valueOf(0.0)) != 0) {
+                aux1 = aux1.setScale(0, BigDecimal.ROUND_CEILING);
+                aux2 = aux2.setScale(0, BigDecimal.ROUND_CEILING);
+
+                aux3 = aux1.add(aux2);
+
+                barraSaldo.setMax(aux3.intValueExact());
+                barraSaldo.setProgress(aux1.intValueExact());
+            } else {
+                barraSaldo.setMax(100);
+                barraSaldo.setProgress(50);
+            }
 
             saldo.setText("R$" + Utils.prepararValor(valorTotal));
             gastos.setText("R$" + Utils.prepararValor(valorGastos));
@@ -333,7 +384,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     transacoes.setAdapter(adapter);
                 }
             } else {
-                containerBaixo.setVisibility(View.INVISIBLE);
+                containerBaixo.setVisibility(View.GONE);
             }
         } catch (ParseException e) {
             // Tratar
