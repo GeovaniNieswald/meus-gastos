@@ -187,14 +187,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(new Intent(MainActivity.this, CategoriaActivity.class));
                 break;
             case R.id.nav_rel_redimentos:
+                startActivity(new Intent(MainActivity.this, RelatorioActivity.class).putExtra("gasto", false));
                 break;
             case R.id.nav_rel_gastos:
+                startActivity(new Intent(MainActivity.this, RelatorioActivity.class).putExtra("gasto", true));
                 break;
             case R.id.nav_compartilhar:
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                String corpo = "Aplicativo Meus Gastos, baixe na Google Play Store - link";
-                intent.putExtra(Intent.EXTRA_TEXT, corpo);
+                intent.putExtra(Intent.EXTRA_TEXT, "Aplicativo Meus Gastos, baixe na Google Play Store - link");
                 startActivity(Intent.createChooser(intent, "Compartilhar"));
                 break;
             case R.id.nav_avaliar:

@@ -53,6 +53,10 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".activity.RelatorioActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".activity.AddCategoriaActivity"
             android:screenOrientation="portrait" />
 

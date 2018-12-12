@@ -77,13 +77,13 @@ public class RecyclerViewCategoriaAdapter extends RecyclerView.Adapter<RecyclerV
         return categorias.get(posicao).getId();
     }
 
-    public class CategoriaViewHolder extends RecyclerView.ViewHolder {
+    protected class CategoriaViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView descricao;
-        public TextView tipo;
-        public ConstraintLayout linha;
+        protected TextView descricao;
+        protected TextView tipo;
+        protected ConstraintLayout linha;
 
-        public CategoriaViewHolder(@NonNull View itemView) {
+        protected CategoriaViewHolder(@NonNull View itemView) {
             super(itemView);
 
             descricao = itemView.findViewById(R.id.descricaoID);

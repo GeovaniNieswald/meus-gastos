@@ -4,6 +4,7 @@ import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Categoria implements Serializable {
 
@@ -43,5 +44,18 @@ public class Categoria implements Serializable {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Categoria categoria = (Categoria) o;
+        return id == categoria.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

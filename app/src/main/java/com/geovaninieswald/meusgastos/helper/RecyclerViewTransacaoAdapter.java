@@ -88,13 +88,13 @@ public class RecyclerViewTransacaoAdapter extends RecyclerView.Adapter<RecyclerV
         return transacoes.get(posicao).getId();
     }
 
-    public class TransacaoViewHolder extends RecyclerView.ViewHolder {
+    protected class TransacaoViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView descricao, categoria, tipoTransacao, valor, data;
-        public ConstraintLayout linha;
-        public ConstraintLayout containerPago;
+        protected TextView descricao, categoria, tipoTransacao, valor, data;
+        protected ConstraintLayout linha;
+        protected ConstraintLayout containerPago;
 
-        public TransacaoViewHolder(@NonNull View itemView) {
+        protected TransacaoViewHolder(@NonNull View itemView) {
             super(itemView);
 
             descricao = itemView.findViewById(R.id.descricaoID);
