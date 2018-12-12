@@ -47,7 +47,6 @@ public class QrCodeScannerActivity extends AppCompatActivity {
         context = QrCodeScannerActivity.this;
 
         barcodeDetector = new BarcodeDetector.Builder(this).setBarcodeFormats(Barcode.QR_CODE).build();
-        cameraSource = new CameraSource.Builder(this, barcodeDetector).setRequestedPreviewSize(1368, 728).setAutoFocusEnabled(true).build();
 
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -55,6 +54,8 @@ public class QrCodeScannerActivity extends AppCompatActivity {
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
+
+                cameraSource = new CameraSource.Builder(QrCodeScannerActivity.this, barcodeDetector).setRequestedPreviewSize(holder.getSurfaceFrame().width(), holder.getSurfaceFrame().height()).setAutoFocusEnabled(true).build();
 
                 try {
                     cameraSource.start(holder);
