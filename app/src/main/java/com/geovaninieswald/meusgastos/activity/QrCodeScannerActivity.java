@@ -16,6 +16,7 @@ import android.view.SurfaceView;
 import android.widget.TextView;
 
 import com.geovaninieswald.meusgastos.R;
+import com.geovaninieswald.meusgastos.helper.Utils;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -31,6 +32,10 @@ public class QrCodeScannerActivity extends AppCompatActivity {
     private BarcodeDetector barcodeDetector;
 
     private Context context;
+
+    private SurfaceHolder holderAux;
+
+    private final int RC_CAMERA = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +56,15 @@ public class QrCodeScannerActivity extends AppCompatActivity {
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                holderAux = holder;
+
+                if (ActivityCompat.checkSelfPermission(QrCodeScannerActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(QrCodeScannerActivity.this, new String[]{Manifest.permission.CAMERA}, RC_CAMERA);
                     return;
                 }
 
-                cameraSource = new CameraSource.Builder(QrCodeScannerActivity.this, barcodeDetector).setRequestedPreviewSize(holder.getSurfaceFrame().width(), holder.getSurfaceFrame().height()).setAutoFocusEnabled(true).build();
-
                 try {
+                    cameraSource = new CameraSource.Builder(QrCodeScannerActivity.this, barcodeDetector).setRequestedPreviewSize(holder.getSurfaceFrame().width(), holder.getSurfaceFrame().height()).setAutoFocusEnabled(true).build();
                     cameraSource.start(holder);
                 } catch (IOException e) {
                     // Tratar
@@ -95,6 +102,28 @@ public class QrCodeScannerActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case RC_CAMERA: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    try {
+                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                            return;
+                        }
+
+                        cameraSource = new CameraSource.Builder(QrCodeScannerActivity.this, barcodeDetector).setRequestedPreviewSize(holderAux.getSurfaceFrame().width(), holderAux.getSurfaceFrame().height()).setAutoFocusEnabled(true).build();
+                        cameraSource.start(holderAux);
+                    } catch (IOException e) {
+                        // Tratar
+                    }
+                } else {
+                    Utils.mostrarMensagemCurta(QrCodeScannerActivity.this, "Você precisa dar permissão para o aplicativo");
+                }
+            }
+        }
     }
 
     @Override
