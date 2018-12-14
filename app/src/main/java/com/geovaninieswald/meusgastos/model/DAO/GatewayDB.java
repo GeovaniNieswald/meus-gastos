@@ -24,4 +24,8 @@ public class GatewayDB {
     protected SQLiteDatabase getDatabase() {
         return this.banco;
     }
+
+    protected void sair() {
+        gatewayDB = null;
+    }
 }

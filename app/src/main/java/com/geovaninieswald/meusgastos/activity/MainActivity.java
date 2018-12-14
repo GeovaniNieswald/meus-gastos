@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +27,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -41,6 +43,7 @@ import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.geovaninieswald.meusgastos.model.DAO.TransacaoDAO;
+import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
 import com.geovaninieswald.meusgastos.model.Transacao;
 import com.geovaninieswald.meusgastos.model.Usuario;
 import com.github.clans.fab.FloatingActionMenu;
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ImageView close;
 
     private ConstraintLayout containerBaixo;
-    private ScrollView containerScroll;
+    private NestedScrollView containerScroll;
 
     private RecyclerView transacoes;
     private RecyclerViewTransacaoAdapter adapter;
@@ -112,6 +115,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer = findViewById(R.id.drawerLayoutID);
         navigationView = findViewById(R.id.navViewID);
 
+        containerScroll.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if (scrollY > oldScrollY) {
+                    famMenu.hideMenu(true);
+                } else {
+                    famMenu.showMenu(true);
+                }
+            }
+        });
+
         setSupportActionBar(toolbar);
 
         fabGasto.setOnClickListener(this);
@@ -144,8 +158,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             rbd.setCircular(true);
             imagem.setBackground(rbd);
         }
-
-        // Esconder fab quando descer scroll, mostrar quando subir
 
         sobreDialog = new Dialog(this);
 
@@ -218,12 +230,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 sobreDialog.show();
                 break;
             case R.id.nav_sair:
-                // VERIFICAR SE ESTÁ SINCRONIZADO, CASO NÃO, AVISAR QUE O USUÁRIO PERDERÁ DADOS, CONFIRMAÇÃO EM AMBOS OS CASOS
+                String mensagem;
 
-                preferencias.sair();
-                ConexaoFirebase.sair();
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                finish();
+                if (preferencias.verificarStatusSincronia()) {
+                    mensagem = "Tem certeza que deseja sair?";
+                } else {
+                    mensagem = "Existem dados não sincronizados que serão perdidos. \n\nTem certeza que deseja sair?";
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                final AlertDialog alert = builder.setTitle("Sair da conta atual")
+                        .setMessage(mensagem)
+                        .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                preferencias.sair();
+                                ConexaoFirebase.sair();
+                                MainActivity.this.deleteDatabase("meus_gastos.db");
+                                new UsuarioDAO(MainActivity.this).sair();
+                                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("Cancelar", null)
+                        .create();
+
+                alert.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+                        alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorPrimary));
+                        alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorPrimary));
+                    }
+                });
+
+                alert.show();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawerLayoutID);

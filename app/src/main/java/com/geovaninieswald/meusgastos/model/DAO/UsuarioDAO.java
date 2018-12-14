@@ -49,4 +49,8 @@ public class UsuarioDAO {
 
         return false;
     }
+
+    public void sair(){
+        gatewayDB.sair();
+    }
 }

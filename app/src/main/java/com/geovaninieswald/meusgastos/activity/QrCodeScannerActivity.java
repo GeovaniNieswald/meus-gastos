@@ -63,12 +63,7 @@ public class QrCodeScannerActivity extends AppCompatActivity {
                     return;
                 }
 
-                try {
-                    cameraSource = new CameraSource.Builder(QrCodeScannerActivity.this, barcodeDetector).setRequestedPreviewSize(holder.getSurfaceFrame().width(), holder.getSurfaceFrame().height()).setAutoFocusEnabled(true).build();
-                    cameraSource.start(holder);
-                } catch (IOException e) {
-                    // Tratar
-                }
+                iniciarCamera(holder);
             }
 
             @Override
@@ -109,16 +104,7 @@ public class QrCodeScannerActivity extends AppCompatActivity {
         switch (requestCode) {
             case RC_CAMERA: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    try {
-                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                            return;
-                        }
-
-                        cameraSource = new CameraSource.Builder(QrCodeScannerActivity.this, barcodeDetector).setRequestedPreviewSize(holderAux.getSurfaceFrame().width(), holderAux.getSurfaceFrame().height()).setAutoFocusEnabled(true).build();
-                        cameraSource.start(holderAux);
-                    } catch (IOException e) {
-                        // Tratar
-                    }
+                    iniciarCamera(holderAux);
                 } else {
                     Utils.mostrarMensagemCurta(QrCodeScannerActivity.this, "Você precisa dar permissão para o aplicativo");
                 }
@@ -130,5 +116,16 @@ public class QrCodeScannerActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    private void iniciarCamera(SurfaceHolder holder) {
+        try {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                cameraSource = new CameraSource.Builder(QrCodeScannerActivity.this, barcodeDetector).setRequestedPreviewSize(holder.getSurfaceFrame().width(), holder.getSurfaceFrame().height()).setAutoFocusEnabled(true).build();
+                cameraSource.start(holder);
+            }
+        } catch (IOException e) {
+            // Tratar
+        }
     }
 }

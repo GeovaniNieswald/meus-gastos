@@ -199,7 +199,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                                     preferencias.sair();
                                 } else {
                                     // VERIFICAR SE BASE LOCAL ESTÁ SINCRONIZADA COM FIREBASE, CASO NÃO ESTEJA CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
-
+                                    preferencias.salvarStatusSincronia(true);
                                     finish();
                                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                 }
