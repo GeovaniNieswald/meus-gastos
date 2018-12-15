@@ -15,6 +15,7 @@ import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.model.Categoria;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewCategoriaAdapter extends RecyclerView.Adapter<RecyclerViewCategoriaAdapter.CategoriaViewHolder> {
@@ -61,6 +62,13 @@ public class RecyclerViewCategoriaAdapter extends RecyclerView.Adapter<RecyclerV
     @Override
     public int getItemCount() {
         return categorias != null ? categorias.size() : 0;
+    }
+
+    public void atualizarLista(List<Categoria> categorias) {
+        this.categorias = new ArrayList<>();
+        this.categorias.addAll(categorias);
+
+        notifyDataSetChanged();
     }
 
     public void removerCategoria(int posicao) {

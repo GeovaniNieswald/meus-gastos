@@ -16,8 +16,7 @@
         <item name="android:windowBackground">@drawable/launch_screen</item>
     </style>
 
-    <style name="CloseToolbar">
-        <item name="android:background">@color/colorPrimary</item>
+    <style name="CloseToolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:textColorPrimary">@color/white</item>
     </style>
 

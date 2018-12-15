@@ -15,6 +15,7 @@ import com.geovaninieswald.meusgastos.activity.AddTransacaoActivity;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.model.Transacao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewTransacaoAdapter extends RecyclerView.Adapter<RecyclerViewTransacaoAdapter.TransacaoViewHolder> {
@@ -72,6 +73,13 @@ public class RecyclerViewTransacaoAdapter extends RecyclerView.Adapter<RecyclerV
     @Override
     public int getItemCount() {
         return transacoes != null ? transacoes.size() : 0;
+    }
+
+    public void atualizarLista(List<Transacao> transacoes) {
+        this.transacoes = new ArrayList<>();
+        this.transacoes.addAll(transacoes);
+
+        notifyDataSetChanged();
     }
 
     public void removerTransacao(int posicao) {

@@ -8,8 +8,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -28,13 +31,14 @@ import com.github.clans.fab.FloatingActionMenu;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
-public class TransacaoActivity extends AppCompatActivity implements View.OnClickListener {
+public class TransacaoActivity extends AppCompatActivity implements View.OnClickListener, SearchView.OnQueryTextListener {
 
     private Toolbar toolbar;
     private FloatingActionMenu famMenu;
@@ -48,6 +52,8 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
     private GregorianCalendar cal;
     private Date mesAnoDate;
     private Locale local;
+
+    private List<Transacao> transacoesList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +101,7 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
         mesAnoDate = new Date();
         cal.setTime(mesAnoDate);
 
-        setAdapter();
+        setAdapter("");
     }
 
     @Override
@@ -111,7 +117,7 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
 
                 mesAnoDate = cal.getTime();
 
-                setAdapter();
+                setAdapter("");
                 break;
             case R.id.proximoMesID:
                 if (cal.get(Calendar.MONTH) == Calendar.DECEMBER) {
@@ -123,7 +129,7 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
 
                 mesAnoDate = cal.getTime();
 
-                setAdapter();
+                setAdapter("");
                 break;
             case R.id.fabGastoID:
                 famMenu.close(true);
@@ -135,41 +141,83 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    private void setAdapter() {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.pesquisa_menu, menu);
+
+        MenuItem pesquisa = menu.findItem(R.id.pesquisaID);
+        SearchView searchView = (SearchView) pesquisa.getActionView();
+        searchView.setOnQueryTextListener(this);
+
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        String descricao = s.toLowerCase();
+        setAdapter(descricao);
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        String descricao = s.toLowerCase();
+        setAdapter(descricao);
+        return true;
+    }
+
+    private void setAdapter(String descricao) {
         mesAno.setText(Utils.primeriaLetraMaiuscula(new SimpleDateFormat("MMMM 'de' yyyy", local).format(mesAnoDate)));
 
-        try {
-            List<Transacao> transacoesList = new TransacaoDAO(this).retornarPorMesAno(mesAnoDate);
+        if (descricao.trim().isEmpty()) {
+            try {
+                transacoesList = new TransacaoDAO(this).retornarPorMesAno(mesAnoDate);
 
-            BigDecimal totalBD = BigDecimal.valueOf(0.0);
+                atualizarTotal(transacoesList);
+
+                adapter = new RecyclerViewTransacaoAdapter(TransacaoActivity.this, transacoesList);
+                transacoes.setAdapter(adapter);
+            } catch (ParseException e) {
+                // Tratar
+            }
+        } else {
+            List<Transacao> newList = new ArrayList<>();
 
             for (Transacao t : transacoesList) {
-                if (t.isPago()) {
-                    if (t.getCategoria().getTipoCategoria() == TipoCategoria.GASTO) {
-                        totalBD = totalBD.subtract(t.getValor());
-                    } else if (t.getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
-                        totalBD = totalBD.add(t.getValor());
-                    }
+                if (t.getDescricao().toLowerCase().contains(descricao)) {
+                    newList.add(t);
                 }
             }
 
-            total.setText("R$" + Utils.prepararValor(totalBD));
+            atualizarTotal(newList);
+            adapter.atualizarLista(newList);
+        }
+    }
 
-            switch (totalBD.compareTo(BigDecimal.valueOf(0.0))) {
-                case 0:
-                    total.setTextColor(getResources().getColor(R.color.white));
-                    break;
-                case 1:
-                    total.setTextColor(getResources().getColor(R.color.rendimento));
-                    break;
-                case -1:
-                    total.setTextColor(getResources().getColor(R.color.gasto));
+    private void atualizarTotal(List<Transacao> newList) {
+        BigDecimal totalBD = BigDecimal.valueOf(0.0);
+
+        for (Transacao t : newList) {
+            if (t.isPago()) {
+                if (t.getCategoria().getTipoCategoria() == TipoCategoria.GASTO) {
+                    totalBD = totalBD.subtract(t.getValor());
+                } else if (t.getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
+                    totalBD = totalBD.add(t.getValor());
+                }
             }
+        }
 
-            adapter = new RecyclerViewTransacaoAdapter(TransacaoActivity.this, transacoesList);
-            transacoes.setAdapter(adapter);
-        } catch (ParseException e) {
-            // Tratar
+        total.setText("R$" + Utils.prepararValor(totalBD));
+
+        switch (totalBD.compareTo(BigDecimal.valueOf(0.0))) {
+            case 0:
+                total.setTextColor(getResources().getColor(R.color.white));
+                break;
+            case 1:
+                total.setTextColor(getResources().getColor(R.color.rendimento));
+                break;
+            case -1:
+                total.setTextColor(getResources().getColor(R.color.gasto));
         }
     }
 
@@ -214,7 +262,7 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
 
                                 if (numItens > 0) {
                                     adapter.removerTransacao(POSICAO);
-                                    setAdapter();
+                                    setAdapter("");
                                     // Excluir do firebase
                                     Toast.makeText(TransacaoActivity.this, "Transação Excluida", Toast.LENGTH_SHORT).show();
                                 } else {

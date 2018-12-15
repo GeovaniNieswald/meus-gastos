@@ -8,8 +8,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.geovaninieswald.meusgastos.R;
@@ -17,14 +20,20 @@ import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.helper.ItemOffsetDecoration;
 import com.geovaninieswald.meusgastos.helper.RecyclerViewCategoriaAdapter;
 import com.geovaninieswald.meusgastos.helper.Utils;
+import com.geovaninieswald.meusgastos.model.Categoria;
 import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
 
-public class CategoriaActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class CategoriaActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     private Toolbar toolbar;
     private FloatingActionButton fabAdd;
     private RecyclerView categorias;
     private RecyclerViewCategoriaAdapter adapter;
+
+    private List<Categoria> categoriasList;
 
     private boolean transacao;
     private boolean gasto;
@@ -41,6 +50,7 @@ public class CategoriaActivity extends AppCompatActivity {
         toolbar.setTitle("Categorias");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,18 +78,61 @@ public class CategoriaActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        if (transacao) {
-            TipoCategoria tc = TipoCategoria.GASTO;
+        setAdapter("");
+    }
 
-            if (!gasto)
-                tc = TipoCategoria.RENDIMENTO;
+    private void setAdapter(String descricao) {
+        if (descricao.trim().isEmpty()) {
+            if (transacao) {
+                TipoCategoria tc = TipoCategoria.GASTO;
 
-            adapter = new RecyclerViewCategoriaAdapter(CategoriaActivity.this, new CategoriaDAO(this).retornarPorTipo(tc));
+                if (!gasto)
+                    tc = TipoCategoria.RENDIMENTO;
+
+                categoriasList = new CategoriaDAO(this).retornarPorTipo(tc);
+                adapter = new RecyclerViewCategoriaAdapter(CategoriaActivity.this, categoriasList);
+            } else {
+                categoriasList = new CategoriaDAO(this).retornarTodas();
+                adapter = new RecyclerViewCategoriaAdapter(CategoriaActivity.this, categoriasList);
+            }
+
+            categorias.setAdapter(adapter);
         } else {
-            adapter = new RecyclerViewCategoriaAdapter(CategoriaActivity.this, new CategoriaDAO(this).retornarTodas());
-        }
+            List<Categoria> newList = new ArrayList<>();
 
-        categorias.setAdapter(adapter);
+            for (Categoria c : categoriasList) {
+                if (c.getDescricao().toLowerCase().contains(descricao)) {
+                    newList.add(c);
+                }
+            }
+
+            adapter.atualizarLista(newList);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.pesquisa_menu, menu);
+
+        MenuItem pesquisa = menu.findItem(R.id.pesquisaID);
+        SearchView searchView = (SearchView) pesquisa.getActionView();
+        searchView.setOnQueryTextListener(this);
+
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        String descricao = s.toLowerCase();
+        setAdapter(descricao);
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        String descricao = s.toLowerCase();
+        setAdapter(descricao);
+        return true;
     }
 
     private void configurarRecycler() {
