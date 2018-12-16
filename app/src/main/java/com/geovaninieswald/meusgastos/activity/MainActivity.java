@@ -330,7 +330,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     List<Transacao> transacoes = daoTransacao.retornarTodas();
 
                     referenciaCategoriaDB.removeValue();
-
                     referenciaTransacaoDB.removeValue();
 
                     for (Categoria c : categorias) {

@@ -23,8 +23,12 @@ import com.facebook.login.LoginResult;
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.helper.Utils;
+import com.geovaninieswald.meusgastos.model.Categoria;
+import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
+import com.geovaninieswald.meusgastos.model.DAO.TransacaoDAO;
 import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
+import com.geovaninieswald.meusgastos.model.Transacao;
 import com.geovaninieswald.meusgastos.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -41,11 +45,18 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LoginActivity extends Activity implements View.OnClickListener {
 
@@ -59,6 +70,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     private FirebaseAuth autenticacao;
     private DatabaseReference referenciaDB;
     private Usuario usuario;
+    private List<Usuario> usuarios;
 
     private final int COD_GOOGLE = 101;
 
@@ -70,6 +82,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
         preferencias = new SharedFirebasePreferences(LoginActivity.this);
         referenciaDB = ConexaoFirebase.getDBReference("usuarios");
+        usuarios = new ArrayList<>();
 
         if (preferencias.verificarLogin()) {
             finish();
@@ -137,6 +150,20 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         super.onStart();
 
         autenticacao = ConexaoFirebase.getFirebaseAuth();
+
+        referenciaDB.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot objSnapshot : dataSnapshot.getChildren()) {
+                    Usuario user = objSnapshot.getValue(Usuario.class);
+                    usuarios.add(user);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
     }
 
     @Override
@@ -196,31 +223,47 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
                     preferencias.salvarLogin(usuario);
 
-                    referenciaDB.child(usuario.getId()).setValue(usuario).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> voidTask) {
-                            if (voidTask.isSuccessful()) {
-                                UsuarioDAO dao = new UsuarioDAO(LoginActivity.this);
-                                long retorno = dao.salvar(usuario);
+                    boolean usuarioExiste = false;
 
-                                if (retorno == -1) {
-                                    Utils.pararCarregamento(carregando, containerMeio);
+                    for (Usuario u : usuarios) {
+                        if (usuario.getEmail().equals(u.getEmail())) {
+                            usuarioExiste = true;
+
+                            Map<String, Object> usuarioMap = new HashMap<>();
+                            usuarioMap.put("email", usuario.getEmail());
+                            usuarioMap.put("imagem",usuario.getImagem());
+                            usuarioMap.put("nome",usuario.getNome());
+
+                            referenciaDB.child(usuario.getId()).updateChildren(usuarioMap).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> voidTask) {
+                                    if (voidTask.isSuccessful()) {
+                                        salvarUsuario();
+                                    } else {
+                                        Utils.mostrarMensagemCurta(LoginActivity.this, "Não foi possível efetuar login");
+                                        ConexaoFirebase.sair();
+                                        preferencias.sair();
+                                    }
+                                }
+                            });
+
+                        }
+                    }
+
+                    if (!usuarioExiste) {
+                        referenciaDB.child(usuario.getId()).setValue(usuario).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> voidTask) {
+                                if (voidTask.isSuccessful()) {
+                                    salvarUsuario();
+                                } else {
                                     Utils.mostrarMensagemCurta(LoginActivity.this, "Não foi possível efetuar login");
                                     ConexaoFirebase.sair();
                                     preferencias.sair();
-                                } else {
-                                    // VERIFICAR SE BASE LOCAL ESTÁ SINCRONIZADA COM FIREBASE, CASO NÃO ESTEJA CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
-                                    preferencias.salvarStatusSincronia(true);
-                                    finish();
-                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                 }
-                            } else {
-                                Utils.mostrarMensagemCurta(LoginActivity.this, "Não foi possível efetuar login");
-                                ConexaoFirebase.sair();
-                                preferencias.sair();
                             }
-                        }
-                    });
+                        });
+                    }
                 } else {
                     Utils.pararCarregamento(carregando, containerMeio);
 
@@ -238,6 +281,56 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 }
             }
         });
+    }
+
+    private void salvarUsuario() {
+        UsuarioDAO dao = new UsuarioDAO(LoginActivity.this);
+        long retorno = dao.salvar(usuario);
+
+        if (retorno == -1) {
+            Utils.pararCarregamento(carregando, containerMeio);
+            Utils.mostrarMensagemCurta(LoginActivity.this, "Não foi possível efetuar login");
+            ConexaoFirebase.sair();
+            preferencias.sair();
+        } else {
+            DatabaseReference referenciaCategoriaDB = referenciaDB.child(usuario.getId()).child("categorias");
+            final CategoriaDAO daoCategoria = new CategoriaDAO(LoginActivity.this);
+
+            referenciaCategoriaDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot objSnapshot : dataSnapshot.getChildren()) {
+                        Categoria c = objSnapshot.getValue(Categoria.class);
+                        daoCategoria.salvar(c);
+                    }
+
+                    DatabaseReference referenciaTransacaoDB = referenciaDB.child(usuario.getId()).child("transacoes");
+                    final TransacaoDAO daoTransacao = new TransacaoDAO(LoginActivity.this);
+
+                    referenciaTransacaoDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot objSnapshot : dataSnapshot.getChildren()) {
+                                Transacao t = objSnapshot.getValue(Transacao.class);
+                                daoTransacao.salvar(t);
+                            }
+
+                            preferencias.salvarStatusSincronia(true);
+                            finish();
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                        }
+                    });
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
+            });
+        }
     }
 
     private void keyHash() {

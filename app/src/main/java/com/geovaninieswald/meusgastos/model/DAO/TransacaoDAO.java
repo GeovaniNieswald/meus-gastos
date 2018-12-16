@@ -31,7 +31,11 @@ public class TransacaoDAO {
 
         ContentValues cv;
 
-        int quantidade = transacao.getQuantidade();
+        int quantidade = 1;
+
+        if (transacao.getQuantidade() != 0)
+            quantidade = transacao.getQuantidade();
+
         Date data = transacao.getDataBD();
         int count = 0;
 

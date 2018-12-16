@@ -106,6 +106,7 @@ public class Transacao implements Serializable {
         this.pago = pago;
     }
 
+    @Exclude
     public int getQuantidade() {
         return quantidade;
     }

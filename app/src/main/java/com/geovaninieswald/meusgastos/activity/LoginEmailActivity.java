@@ -13,8 +13,12 @@ import android.widget.ProgressBar;
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.helper.Utils;
+import com.geovaninieswald.meusgastos.model.Categoria;
+import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
+import com.geovaninieswald.meusgastos.model.DAO.TransacaoDAO;
 import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
+import com.geovaninieswald.meusgastos.model.Transacao;
 import com.geovaninieswald.meusgastos.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -136,12 +140,44 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
                         ConexaoFirebase.sair();
                         preferencias.sair();
                     } else {
-                        // VERIFICAR SE BASE LOCAL ESTÁ SINCRONIZADA COM FIREBASE, CASO NÃO ESTEJA CARREGAR OS DADOS (FIREBASE) DO USUARIO QUE ENTROU PARA O SQLITE
+                        DatabaseReference referenciaCategoriaDB = referenciaDB.child(usuario.getId()).child("categorias");
+                        final CategoriaDAO daoCategoria = new CategoriaDAO(LoginEmailActivity.this);
 
-                        preferencias.salvarStatusSincronia(true);
-                        finishAffinity();
-                        finish();
-                        startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
+                        referenciaCategoriaDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for (DataSnapshot objSnapshot : dataSnapshot.getChildren()) {
+                                    Categoria c = objSnapshot.getValue(Categoria.class);
+                                    daoCategoria.salvar(c);
+                                }
+
+                                DatabaseReference referenciaTransacaoDB = referenciaDB.child(usuario.getId()).child("transacoes");
+                                final TransacaoDAO daoTransacao = new TransacaoDAO(LoginEmailActivity.this);
+
+                                referenciaTransacaoDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot objSnapshot : dataSnapshot.getChildren()) {
+                                            Transacao t = objSnapshot.getValue(Transacao.class);
+                                            daoTransacao.salvar(t);
+                                        }
+
+                                        preferencias.salvarStatusSincronia(true);
+                                        finishAffinity();
+                                        finish();
+                                        startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
                     }
                 } else {
                     Utils.pararCarregamento(carregando, containerMeio, containerFim);
