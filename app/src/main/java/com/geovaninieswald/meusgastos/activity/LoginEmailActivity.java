@@ -181,7 +181,7 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
                     }
                 } else {
                     Utils.pararCarregamento(carregando, containerMeio, containerFim);
-                    Utils.mostrarMensagemCurta(LoginEmailActivity.this, "Erro ao logar");
+                    Utils.mostrarMensagemCurta(LoginEmailActivity.this, "Erro ao logar, verifique se o e-mail e a senha estão corretos");
                 }
             }
         });
