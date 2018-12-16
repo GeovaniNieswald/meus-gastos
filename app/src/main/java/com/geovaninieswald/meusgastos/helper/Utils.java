@@ -2,11 +2,17 @@ package com.geovaninieswald.meusgastos.helper;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
 import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.geovaninieswald.meusgastos.R;
+import com.geovaninieswald.meusgastos.activity.MainActivity;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -56,6 +62,44 @@ public class Utils {
                 child.setEnabled(true);
             }
         }
+    }
+
+    public static boolean estaConectado(Context context) {
+        ConnectivityManager conmag = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (conmag != null) {
+            conmag.getActiveNetworkInfo();
+
+            //Verifica internet pela WIFI
+            if (conmag.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnected()) {
+                return true;
+            }
+
+            //Verifica se tem internet móvel
+            if (conmag.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnected()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static void alertaSimples(final Context context, String titulo, String mensagem) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        final AlertDialog alert = builder.setTitle(titulo)
+                .setMessage(mensagem)
+                .setPositiveButton("Ok", null)
+                .create();
+
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(context.getResources().getColor(R.color.colorPrimary));
+            }
+        });
+
+        alert.show();
     }
 
     public static void hideSoftKeyboard(Context context, View view) {

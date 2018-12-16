@@ -31,7 +31,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
@@ -39,12 +38,15 @@ import com.geovaninieswald.meusgastos.helper.ItemOffsetDecoration;
 import com.geovaninieswald.meusgastos.helper.RecyclerViewTransacaoAdapter;
 import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.helper.Utils;
+import com.geovaninieswald.meusgastos.model.Categoria;
+import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
 import com.geovaninieswald.meusgastos.model.DAO.ConexaoFirebase;
 import com.geovaninieswald.meusgastos.model.DAO.TransacaoDAO;
 import com.geovaninieswald.meusgastos.model.DAO.UsuarioDAO;
 import com.geovaninieswald.meusgastos.model.Transacao;
 import com.geovaninieswald.meusgastos.model.Usuario;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.firebase.database.DatabaseReference;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -80,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Usuario usuario;
     private SharedFirebasePreferences preferencias;
+    private DatabaseReference referenciaCategoriaDB;
+    private DatabaseReference referenciaTransacaoDB;
 
     private GregorianCalendar cal;
     private Date mesAnoDate;
@@ -184,9 +188,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-
-        // ADICIONAR OPÇÃO SINCRONIZAR
-
         switch (item.getItemId()) {
             case R.id.nav_home:
                 break;
@@ -210,6 +211,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_avaliar:
                 Utils.mostrarMensagemCurta(MainActivity.this, "Função ainda não disponível");
+                break;
+            case R.id.nav_sincronizar:
+                sincronizar();
                 break;
             case R.id.nav_sobre:
                 sobreDialog.setContentView(R.layout.popup_sobre);
@@ -310,6 +314,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private void sincronizar() {
+        if (preferencias.verificarStatusSincronia()) {
+            Utils.alertaSimples(MainActivity.this, "Status Sincronia", "Seus dados já estão sincronizados com a nuvem!");
+        } else {
+            if (Utils.estaConectado(MainActivity.this)) {
+                try {
+                    referenciaCategoriaDB = ConexaoFirebase.getDBReference("usuarios").child(usuario.getId() + "").child("categorias");
+                    referenciaTransacaoDB = ConexaoFirebase.getDBReference("usuarios").child(usuario.getId() + "").child("transacoes");
+
+                    CategoriaDAO daoCategoria = new CategoriaDAO(MainActivity.this);
+                    TransacaoDAO daoTransacao = new TransacaoDAO(MainActivity.this);
+
+                    List<Categoria> categorias = daoCategoria.retornarTodas();
+                    List<Transacao> transacoes = daoTransacao.retornarTodas();
+
+                    referenciaCategoriaDB.removeValue();
+
+                    referenciaTransacaoDB.removeValue();
+
+                    for (Categoria c : categorias) {
+                        referenciaCategoriaDB.child(c.getId() + "").setValue(c);
+                    }
+
+                    for (Transacao t : transacoes) {
+                        referenciaTransacaoDB.child(t.getId() + "").setValue(t);
+                    }
+
+                    preferencias.salvarStatusSincronia(true);
+                    Utils.alertaSimples(MainActivity.this, "Status Sincronia", "Seus dados foram sincronizados com a nuvem!");
+                } catch (ParseException e) {
+                    preferencias.salvarStatusSincronia(false);
+                    Utils.alertaSimples(MainActivity.this, "Status Sincronia", "Ocorreu algum erro ao sincronizar!");
+                }
+            } else {
+                Utils.alertaSimples(MainActivity.this, "Sem conexão", "Você precisa estar conectado à internet para sincronizar seus dados!");
+            }
+        }
+    }
+
     private void setAdapter() {
         mesAno.setText(Utils.primeriaLetraMaiuscula(new SimpleDateFormat("MMMM 'de' yyyy", local).format(mesAnoDate)));
 
@@ -330,7 +373,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             BigDecimal valorTotal;
 
             for (Transacao t : transacoesList) {
-                alvo.setTime(t.getData());
+                alvo.setTime(t.getDataBD());
                 Boolean mesmoDia = atual.get(Calendar.DAY_OF_YEAR) == alvo.get(Calendar.DAY_OF_YEAR) && atual.get(Calendar.YEAR) == alvo.get(Calendar.YEAR);
 
                 if (mesmoDia) {
@@ -339,9 +382,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 if (t.isPago()) {
                     if (t.getCategoria().getTipoCategoria() == TipoCategoria.GASTO) {
-                        valorGastos = valorGastos.add(t.getValor());
+                        valorGastos = valorGastos.add(t.getValorBD());
                     } else if (t.getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
-                        valorRendimentos = valorRendimentos.add(t.getValor());
+                        valorRendimentos = valorRendimentos.add(t.getValorBD());
                     }
                 }
             }
@@ -398,9 +441,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     for (Transacao t : transacoesDia) {
                         if (t.isPago()) {
                             if (t.getCategoria().getTipoCategoria() == TipoCategoria.GASTO) {
-                                valorGastos = valorGastos.add(t.getValor());
+                                valorGastos = valorGastos.add(t.getValorBD());
                             } else if (t.getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
-                                valorRendimentos = valorRendimentos.add(t.getValor());
+                                valorRendimentos = valorRendimentos.add(t.getValorBD());
                             }
                         }
                     }
@@ -461,10 +504,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 if (numItens > 0) {
                                     adapter.removerTransacao(POSICAO);
                                     setAdapter();
-                                    // Excluir do firebase
-                                    Toast.makeText(MainActivity.this, "Transação Excluida", Toast.LENGTH_SHORT).show();
+                                    Utils.mostrarMensagemCurta(MainActivity.this, "Transação Excluida");
+                                    preferencias.salvarStatusSincronia(false);
                                 } else {
-                                    Toast.makeText(MainActivity.this, "Não foi possível excluir a transação", Toast.LENGTH_SHORT).show();
+                                    adapter.cancelarRemocao(POSICAO);
+                                    Utils.mostrarMensagemCurta(MainActivity.this, "Não foi possível excluir a transação");
                                 }
                             }
                         })

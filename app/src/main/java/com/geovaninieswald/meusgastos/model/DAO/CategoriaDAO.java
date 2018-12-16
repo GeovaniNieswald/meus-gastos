@@ -3,6 +3,7 @@ package com.geovaninieswald.meusgastos.model.DAO;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.model.Categoria;
@@ -14,8 +15,8 @@ public class CategoriaDAO {
 
     private GatewayDB gatewayDB;
 
-    public CategoriaDAO(Context ctx) {
-        gatewayDB = GatewayDB.getInstance(ctx);
+    public CategoriaDAO(Context context) {
+        gatewayDB = GatewayDB.getInstance(context);
     }
 
     public long salvar(Categoria categoria) {
@@ -31,7 +32,11 @@ public class CategoriaDAO {
     }
 
     public int excluir(long id) {
-        return gatewayDB.getDatabase().delete("categoria", "id = ?", new String[]{id + ""});
+        try {
+            return gatewayDB.getDatabase().delete("categoria", "id = ?", new String[]{id + ""});
+        } catch (SQLiteConstraintException e) {
+            return 0;
+        }
     }
 
     public boolean categoriaExiste(String descricao, TipoCategoria tipo) {

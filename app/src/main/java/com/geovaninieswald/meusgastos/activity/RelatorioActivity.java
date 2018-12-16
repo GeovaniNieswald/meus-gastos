@@ -3,6 +3,7 @@ package com.geovaninieswald.meusgastos.activity;
 import android.content.ContentValues;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -52,6 +53,7 @@ public class RelatorioActivity extends AppCompatActivity implements View.OnClick
     private boolean gasto;
     private String tipoTransacao;
 
+    private ConstraintLayout containerGrafico;
     private ScrollView containerScroll;
 
     private RecyclerView relatorio;
@@ -69,6 +71,7 @@ public class RelatorioActivity extends AppCompatActivity implements View.OnClick
         local = new Locale("pt", "BR");
         cal = new GregorianCalendar();
 
+        containerGrafico = findViewById(R.id.containerGraficoID);
         containerScroll = findViewById(R.id.containerScrollID);
         relatorio = findViewById(R.id.relatorioID);
         info = findViewById(R.id.infoID);
@@ -206,9 +209,11 @@ public class RelatorioActivity extends AppCompatActivity implements View.OnClick
                 }
 
                 info.setVisibility(View.VISIBLE);
+                containerGrafico.setVisibility(View.INVISIBLE);
                 containerScroll.setVisibility(View.INVISIBLE);
             } else {
                 info.setVisibility(View.INVISIBLE);
+                containerGrafico.setVisibility(View.VISIBLE);
                 containerScroll.setVisibility(View.VISIBLE);
 
                 ArrayList<PieEntry> values = new ArrayList<>();
@@ -220,8 +225,8 @@ public class RelatorioActivity extends AppCompatActivity implements View.OnClick
 
                     for (Transacao t : transacoesList) {
                         if (t.getCategoria().equals(c)) {
-                            valor = valor.add(t.getValor());
-                            total = total.add(t.getValor());
+                            valor = valor.add(t.getValorBD());
+                            total = total.add(t.getValorBD());
                         }
                     }
 

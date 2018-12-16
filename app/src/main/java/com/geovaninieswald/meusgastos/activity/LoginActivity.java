@@ -119,13 +119,16 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.loginGoogleID:
-                startActivityForResult(mGoogleSignInClient.getSignInIntent(), COD_GOOGLE);
+                if (verificarConexao())
+                    startActivityForResult(mGoogleSignInClient.getSignInIntent(), COD_GOOGLE);
                 break;
             case R.id.loginFaceID:
-                LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile"));
+                if (verificarConexao())
+                    LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile"));
                 break;
             case R.id.loginEmailID:
-                startActivity(new Intent(LoginActivity.this, LoginEmailActivity.class));
+                if (verificarConexao())
+                    startActivity(new Intent(LoginActivity.this, LoginEmailActivity.class));
         }
     }
 
@@ -150,6 +153,15 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             }
         } else {
             callbackManager.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private boolean verificarConexao() {
+        if (Utils.estaConectado(LoginActivity.this)) {
+            return true;
+        } else {
+            Utils.alertaSimples(LoginActivity.this, "Sem conexão", "Você precisa estar conectado à internet para fazer login!");
+            return false;
         }
     }
 
@@ -180,15 +192,14 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         }
                     }
 
-                    usuario = new Usuario(usuarioFirebase.getDisplayName(), urlImagem, usuarioFirebase.getEmail());
-                    usuario.setId(usuarioFirebase.getUid());
+                    usuario = new Usuario(usuarioFirebase.getUid(), usuarioFirebase.getDisplayName(), urlImagem, usuarioFirebase.getEmail());
 
                     preferencias.salvarLogin(usuario);
 
                     referenciaDB.child(usuario.getId()).setValue(usuario).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<Void>() {
                         @Override
-                        public void onComplete(@NonNull Task<Void> pao) {
-                            if (pao.isSuccessful()) {
+                        public void onComplete(@NonNull Task<Void> voidTask) {
+                            if (voidTask.isSuccessful()) {
                                 UsuarioDAO dao = new UsuarioDAO(LoginActivity.this);
                                 long retorno = dao.salvar(usuario);
 

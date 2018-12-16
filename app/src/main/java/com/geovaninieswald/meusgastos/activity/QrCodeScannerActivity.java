@@ -13,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.TextView;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.helper.Utils;
@@ -30,10 +29,9 @@ public class QrCodeScannerActivity extends AppCompatActivity {
     private SurfaceView surfaceView;
     private CameraSource cameraSource;
     private BarcodeDetector barcodeDetector;
+    private SurfaceHolder holderAux;
 
     private Context context;
-
-    private SurfaceHolder holderAux;
 
     private final int RC_CAMERA = 10;
 

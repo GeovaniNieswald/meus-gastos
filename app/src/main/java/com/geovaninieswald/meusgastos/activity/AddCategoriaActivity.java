@@ -12,6 +12,7 @@ import android.widget.RadioButton;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
+import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.Categoria;
 import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
@@ -24,6 +25,8 @@ public class AddCategoriaActivity extends AppCompatActivity implements View.OnCl
     private Button adicionar;
     private ProgressBar carregando;
     private ConstraintLayout containerMeio;
+
+    private SharedFirebasePreferences preferencias;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,8 @@ public class AddCategoriaActivity extends AppCompatActivity implements View.OnCl
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
         adicionar.setOnClickListener(this);
+
+        preferencias = new SharedFirebasePreferences(AddCategoriaActivity.this);
     }
 
     @Override
@@ -79,8 +84,7 @@ public class AddCategoriaActivity extends AppCompatActivity implements View.OnCl
                         rendimento.setChecked(true);
 
                         Utils.mostrarMensagemCurta(AddCategoriaActivity.this, "Categoria adicionada com sucesso");
-
-                        // enviar para firebase alterar sharedPreferences sobre sincronização
+                        preferencias.salvarStatusSincronia(false);
                     }
                 }
         }

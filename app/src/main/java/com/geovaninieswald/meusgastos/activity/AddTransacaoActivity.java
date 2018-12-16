@@ -21,6 +21,7 @@ import android.widget.Switch;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.fragment.DatePickerFragment;
+import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.Categoria;
 import com.geovaninieswald.meusgastos.model.DAO.TransacaoDAO;
@@ -28,8 +29,10 @@ import com.geovaninieswald.meusgastos.model.Transacao;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import faranjit.currency.edittext.CurrencyEditText;
 
@@ -56,6 +59,8 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
 
     private final int RC_CATEGORIA = 0;
     private final int RC_QRCODE = 1;
+
+    private SharedFirebasePreferences preferencias;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +109,7 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
 
         if (alterar) {
             tipoOperacaoTxt1 = "alterar ";
-            tipoOperacaoTxt2 = "alterado ";
+            tipoOperacaoTxt2 = "alterado";
             adicionar.setText("Alterar");
             repetir.setEnabled(false);
 
@@ -115,7 +120,7 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
                 c = transacaoExtra.getCategoria();
                 categoria.setText(c.getDescricao());
 
-                String valorStr = transacaoExtra.getValor().toString();
+                String valorStr = transacaoExtra.getValorBD().toString();
                 valorStr = valorStr.replace(".", ",");
 
                 String[] split = valorStr.split(",");
@@ -125,12 +130,12 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
 
                 valor.setText(valorStr);
 
-                data.setText(Utils.dateParaString(transacaoExtra.getData()));
+                data.setText(Utils.dateParaString(transacaoExtra.getDataBD()));
                 pago.setChecked(transacaoExtra.isPago());
             }
         } else {
             tipoOperacaoTxt1 = "adicionar ";
-            tipoOperacaoTxt2 = "adicionado ";
+            tipoOperacaoTxt2 = "adicionado";
             adicionar.setText("Adicionar");
             repetir.setEnabled(true);
         }
@@ -139,6 +144,8 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
+
+        preferencias = new SharedFirebasePreferences(AddTransacaoActivity.this);
     }
 
     @Override
@@ -192,32 +199,56 @@ public class AddTransacaoActivity extends AppCompatActivity implements View.OnCl
                         Transacao t = new Transacao();
                         t.setDescricao(descricaoStr);
                         t.setCategoria(c);
-                        t.setValor(valorBD);
-                        t.setData(dataD);
+                        t.setValorBD(valorBD);
+                        t.setDataBD(dataD);
                         t.setQuantidade(quantidadeI);
                         t.setPago(pago.isChecked());
 
                         TransacaoDAO dao = new TransacaoDAO(AddTransacaoActivity.this);
-                        long retorno;
+                        List<Long> retorno = new ArrayList<>();
 
                         if (alterar) {
                             t.setId(transacaoExtra.getId());
-                            retorno = dao.alterar(t);
+                            retorno.add(dao.alterar(t));
                         } else {
                             retorno = dao.salvar(t);
                         }
 
-                        if (retorno == -2) {
-                            Utils.pararCarregamento(carregando, containerMeio);
-                            Utils.mostrarMensagemCurta(AddTransacaoActivity.this, tipoTransacao + " já existe");
-                        } else if (retorno == -1) {
-                            Utils.pararCarregamento(carregando, containerMeio);
-                            Utils.mostrarMensagemCurta(AddTransacaoActivity.this, "Não foi possível " + tipoOperacaoTxt1 + "o " + tipoTransacao);
-                        } else {
-                            Utils.pararCarregamento(carregando, containerMeio);
-                            Utils.mostrarMensagemCurta(AddTransacaoActivity.this, tipoTransacao + " " + tipoOperacaoTxt2 + "com sucesso");
+                        boolean erro = false;
+                        int sucesso = 0;
 
-                            // enviar para firebase alterar sharedPreferences sobre sincronização
+                        for (long l : retorno) {
+                            if (l == -2) {
+                                erro = true;
+                            } else if (l == -1) {
+                                erro = true;
+                            } else {
+                                sucesso++;
+                            }
+                        }
+
+                        Utils.pararCarregamento(carregando, containerMeio);
+
+                        if (erro) {
+                            String texto;
+                            if (quantidadeI == 1) {
+                                texto = "Não foi possível " + tipoOperacaoTxt1 + "o " + tipoTransacao;
+                            } else {
+                                texto = "Não foi possível " + tipoOperacaoTxt1 + "algum " + tipoTransacao;
+                            }
+                            Utils.mostrarMensagemCurta(AddTransacaoActivity.this, texto);
+                        } else {
+                            String texto;
+                            if (quantidadeI == 1) {
+                                texto = tipoTransacao + " " + tipoOperacaoTxt2 + " com sucesso";
+                            } else {
+                                texto = tipoTransacao + "s " + tipoOperacaoTxt2 + "s com sucesso";
+                            }
+                            Utils.mostrarMensagemCurta(AddTransacaoActivity.this, texto);
+                        }
+
+                        if (sucesso >= 1) {
+                            preferencias.salvarStatusSincronia(false);
 
                             if (alterar) {
                                 finish();

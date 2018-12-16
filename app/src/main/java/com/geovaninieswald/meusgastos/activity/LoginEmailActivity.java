@@ -25,6 +25,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LoginEmailActivity extends Activity implements View.OnClickListener {
 
     private EditText edtEmail, edtSenha;
@@ -36,7 +39,9 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
     private FirebaseAuth autenticacao;
     private SharedFirebasePreferences preferencias;
     private DatabaseReference referenciaDB;
+
     private Usuario usuario;
+    private List<Usuario> usuarios;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,19 +61,25 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
 
         btnLogin.setOnClickListener(this);
         btnNovo.setOnClickListener(this);
+
+        usuarios = new ArrayList<>();
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.loginID:
-                String email = edtEmail.getText().toString();
-                String senha = edtSenha.getText().toString();
+                if (Utils.estaConectado(LoginEmailActivity.this)) {
+                    String email = edtEmail.getText().toString();
+                    String senha = edtSenha.getText().toString();
 
-                if (email.trim().isEmpty() || senha.trim().isEmpty()) {
-                    Utils.mostrarMensagemCurta(LoginEmailActivity.this, "Você deve informar um e-mail e senha");
+                    if (email.trim().isEmpty() || senha.trim().isEmpty()) {
+                        Utils.mostrarMensagemCurta(LoginEmailActivity.this, "Você deve informar um e-mail e senha");
+                    } else {
+                        login(email, senha);
+                    }
                 } else {
-                    login(email, senha);
+                    Utils.alertaSimples(LoginEmailActivity.this, "Sem conexão", "Você precisa estar conectado à internet para fazer login!");
                 }
 
                 break;
@@ -87,7 +98,8 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot objSnapshot : dataSnapshot.getChildren()) {
-                    usuario = objSnapshot.getValue(Usuario.class);
+                    Usuario user = objSnapshot.getValue(Usuario.class);
+                    usuarios.add(user);
                 }
             }
 
@@ -106,8 +118,12 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
                 if (task.isSuccessful()) {
                     String id = autenticacao.getCurrentUser().getUid();
 
-                    referenciaDB.child(id);
-                    usuario.setId(id);
+                    for (Usuario u : usuarios) {
+                        if (u.getId().equals(id)) {
+                            usuario = u;
+                            break;
+                        }
+                    }
 
                     preferencias.salvarLogin(usuario);
 

@@ -19,6 +19,7 @@ import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.helper.ItemOffsetDecoration;
 import com.geovaninieswald.meusgastos.helper.RecyclerViewCategoriaAdapter;
+import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.Categoria;
 import com.geovaninieswald.meusgastos.model.DAO.CategoriaDAO;
@@ -37,6 +38,8 @@ public class CategoriaActivity extends AppCompatActivity implements SearchView.O
 
     private boolean transacao;
     private boolean gasto;
+
+    private SharedFirebasePreferences preferencias;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +69,8 @@ public class CategoriaActivity extends AppCompatActivity implements SearchView.O
         }
 
         configurarRecycler();
+
+        preferencias = new SharedFirebasePreferences(CategoriaActivity.this);
     }
 
     @Override
@@ -173,13 +178,15 @@ public class CategoriaActivity extends AppCompatActivity implements SearchView.O
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 CategoriaDAO dao = new CategoriaDAO(getBaseContext());
-                                int numItens = dao.excluir(adapter.getDbId(POSICAO));
+                                int id = (int) adapter.getDbId(POSICAO);
+                                int numItens = dao.excluir(id);
 
                                 if (numItens > 0) {
                                     adapter.removerCategoria(POSICAO);
-                                    // Excluir do firebase
                                     Utils.mostrarMensagemCurta(CategoriaActivity.this, "Categoria Excluida");
+                                    preferencias.salvarStatusSincronia(false);
                                 } else {
+                                    adapter.cancelarRemocao(POSICAO);
                                     Utils.mostrarMensagemCurta(CategoriaActivity.this, "Não foi possível excluir a categoria");
                                 }
                             }

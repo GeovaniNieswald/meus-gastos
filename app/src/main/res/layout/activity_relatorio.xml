@@ -77,38 +77,39 @@
         </android.support.constraint.ConstraintLayout>
     </android.support.constraint.ConstraintLayout>
 
-    <ScrollView
-        android:id="@+id/containerScrollID"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/containerGraficoID"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/containerCima">
 
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/graficoID"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+    <ScrollView
+        android:id="@+id/containerScrollID"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/containerGraficoID">
+
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/constraintLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/graficoID"
-                    android:layout_width="280dp"
-                    android:layout_height="280dp"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginBottom="10dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </android.support.constraint.ConstraintLayout>
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -119,7 +120,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/relatorioID"
@@ -146,6 +147,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/containerScrollID"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/containerScrollID" />
+        app:layout_constraintTop_toTopOf="@+id/containerCima" />
 
 </android.support.constraint.ConstraintLayout>

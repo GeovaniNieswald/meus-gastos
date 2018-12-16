@@ -50,7 +50,7 @@ public class UsuarioDAO {
         return false;
     }
 
-    public void sair(){
+    public void sair() {
         gatewayDB.sair();
     }
 }

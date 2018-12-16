@@ -26,57 +26,65 @@ public class TransacaoDAO {
         gatewayDB = GatewayDB.getInstance(context);
     }
 
-    public long salvar(Transacao transacao) {
-        if (transacaoExiste(transacao)) {
-            return -2;
-        } else {
-            ContentValues cv;
+    public List<Long> salvar(Transacao transacao) {
+        List<Long> result = new ArrayList<>();
 
-            int quantidade = transacao.getQuantidade();
-            Date data = transacao.getData();
-            int count = 0;
-            long result = 0;
+        ContentValues cv;
 
-            ArrayList<Date> datas = new ArrayList<>();
+        int quantidade = transacao.getQuantidade();
+        Date data = transacao.getDataBD();
+        int count = 0;
+
+        ArrayList<Date> datas = new ArrayList<>();
+        datas.add(data);
+
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.setTime(data);
+
+        for (int i = 1; i < quantidade; i++) {
+            if (gc.get(Calendar.MONTH) == Calendar.DECEMBER) {
+                gc.roll(Calendar.MONTH, true);
+                gc.roll(Calendar.YEAR, true);
+            } else {
+                gc.roll(Calendar.MONTH, true);
+            }
+
+            data = gc.getTime();
             datas.add(data);
-
-            GregorianCalendar gc = new GregorianCalendar();
-            gc.setTime(data);
-
-            for (int i = 1; i < quantidade; i++) {
-                if (gc.get(Calendar.MONTH) == Calendar.DECEMBER) {
-                    gc.roll(Calendar.MONTH, true);
-                    gc.roll(Calendar.YEAR, true);
-                } else {
-                    gc.roll(Calendar.MONTH, true);
-                }
-
-                data = gc.getTime();
-                datas.add(data);
-            }
-
-            while (count < quantidade && result != -1) {
-                cv = new ContentValues();
-                cv.put("descricao", transacao.getDescricao());
-                cv.put("id_categoria", transacao.getCategoria().getId());
-                cv.put("valor", transacao.getValor().doubleValue());
-                cv.put("data", Utils.dateParaStringBD(datas.get(count)));
-                cv.put("paga", transacao.isPago() ? 1 : 0);
-
-                result = gatewayDB.getDatabase().insert("transacao", null, cv);
-                count++;
-            }
-
-            return result;
         }
+
+        while (count < quantidade) {
+            String descricaoStr = transacao.getDescricao();
+            String idCategoriaStr = transacao.getCategoria().getId() + "";
+            String valorStr = transacao.getValorBD().toString();
+            String dataStr = Utils.dateParaStringBD(datas.get(count));
+
+            cv = new ContentValues();
+            cv.put("descricao", descricaoStr);
+            cv.put("id_categoria", idCategoriaStr);
+            cv.put("valor", transacao.getValorBD().doubleValue());
+            cv.put("data", dataStr);
+            cv.put("paga", transacao.isPago() ? 1 : 0);
+
+            if (transacaoExiste(descricaoStr, idCategoriaStr, valorStr, dataStr)) {
+                result.add((long) -2);
+            } else {
+                result.add(gatewayDB.getDatabase().insert("transacao", null, cv));
+            }
+
+            count++;
+        }
+
+        return result;
+
     }
 
     public long alterar(Transacao transacao) {
         ContentValues cv = new ContentValues();
         cv.put("descricao", transacao.getDescricao());
         cv.put("id_categoria", transacao.getCategoria().getId());
-        cv.put("valor", transacao.getValor().doubleValue());
-        cv.put("data", Utils.dateParaStringBD(transacao.getData()));
+        cv.put("valor", transacao.getValorBD().doubleValue());
+        cv.put("data", Utils.dateParaStringBD(transacao.getDataBD()));
         cv.put("paga", transacao.isPago() ? 1 : 0);
 
         return gatewayDB.getDatabase().update("transacao", cv, "id = ?", new String[]{transacao.getId() + ""});
@@ -86,9 +94,9 @@ public class TransacaoDAO {
         return gatewayDB.getDatabase().delete("transacao", "id = ?", new String[]{id + ""});
     }
 
-    public boolean transacaoExiste(Transacao transacao) {
+    public boolean transacaoExiste(String descricaoStr, String idCategoriaStr, String valorStr, String dataStr) {
         Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM transacao WHERE descricao = ? AND id_categoria = ? AND valor = ? AND data = ?",
-                new String[]{transacao.getDescricao(), transacao.getCategoria().getId() + "", transacao.getValor().toString(), Utils.dateParaStringBD(transacao.getData())});
+                new String[]{descricaoStr, idCategoriaStr, valorStr, dataStr});
 
         cursor.moveToFirst();
         int count = cursor.getCount();
@@ -98,6 +106,41 @@ public class TransacaoDAO {
             return true;
 
         return false;
+    }
+
+    public List<Transacao> retornarTodas() throws ParseException {
+        List<Transacao> transacoes = new ArrayList<>();
+
+        Cursor cursor = gatewayDB.getDatabase().rawQuery("SELECT * FROM transacao AS t1 INNER JOIN categoria AS t2 ON (t1.id_categoria = t2.id) ORDER BY data", null);
+
+        while (cursor.moveToNext()) {
+            Transacao t = new Transacao();
+            t.setId(cursor.getInt(0));
+            t.setDescricao(cursor.getString(1));
+            t.setValorBD(BigDecimal.valueOf(cursor.getDouble(2)));
+            t.setDataBD(Utils.stringParaDateBD(cursor.getString(3)));
+
+            if (cursor.getInt(4) == 1) {
+                t.setPago(true);
+            } else {
+                t.setPago(false);
+            }
+
+            TipoCategoria tc = TipoCategoria.RENDIMENTO;
+
+            if (cursor.getInt(8) == TipoCategoria.GASTO.getCodigo())
+                tc = TipoCategoria.GASTO;
+
+            Categoria c = new Categoria(cursor.getInt(5), tc, cursor.getString(7));
+
+            t.setCategoria(c);
+
+            transacoes.add(t);
+        }
+
+        cursor.close();
+
+        return transacoes;
     }
 
     public List<Transacao> retornarPorMesAno(Date mesAno) throws ParseException {
@@ -111,8 +154,8 @@ public class TransacaoDAO {
             Transacao t = new Transacao();
             t.setId(cursor.getInt(0));
             t.setDescricao(cursor.getString(1));
-            t.setValor(BigDecimal.valueOf(cursor.getDouble(2)));
-            t.setData(Utils.stringParaDateBD(cursor.getString(3)));
+            t.setValorBD(BigDecimal.valueOf(cursor.getDouble(2)));
+            t.setDataBD(Utils.stringParaDateBD(cursor.getString(3)));
 
             if (cursor.getInt(4) == 1) {
                 t.setPago(true);

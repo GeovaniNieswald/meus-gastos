@@ -97,7 +97,11 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.cadastrarID:
-                cadastrarUsuario();
+                if (Utils.estaConectado(CadastroActivity.this)){
+                    cadastrarUsuario();
+                } else{
+                    Utils.alertaSimples(CadastroActivity.this, "Sem conexão", "Você precisa estar conectado à internet para realizar o cadastro!");
+                }
                 break;
             case R.id.iconeID:
                 CropImage.activity()
@@ -149,7 +153,9 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
                     icone.setBackground(getDrawable(R.drawable.ic_cadastro_alerta));
                     HANDLER.postDelayed(RUNNABLE, 4000);
                 } else {
-                    usuario = new Usuario(nome, "", email);
+                    usuario = new Usuario();
+                    usuario.setNome(nome);
+                    usuario.setEmail(email);
                     firebaseAuthWithEmailAndPassword(email, senha);
                 }
             } else {
@@ -218,7 +224,7 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
         referenciaDB.child(usuario.getId()).setValue(usuario).addOnCompleteListener(CadastroActivity.this, new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()){
+                if (task.isSuccessful()) {
                     preferencias.salvarStatusSincronia(true);
 
                     UsuarioDAO dao = new UsuarioDAO(CadastroActivity.this);

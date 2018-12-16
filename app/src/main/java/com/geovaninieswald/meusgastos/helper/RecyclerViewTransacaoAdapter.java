@@ -40,8 +40,8 @@ public class RecyclerViewTransacaoAdapter extends RecyclerView.Adapter<RecyclerV
 
         transacaoViewHolder.descricao.setText(transacoes.get(i).getDescricao());
         transacaoViewHolder.categoria.setText(transacoes.get(i).getCategoria().getDescricao());
-        transacaoViewHolder.valor.setText("R$" + Utils.prepararValor(transacoes.get(i).getValor()));
-        transacaoViewHolder.data.setText(Utils.dateParaString(transacoes.get(i).getData()));
+        transacaoViewHolder.valor.setText("R$" + Utils.prepararValor(transacoes.get(i).getValorBD()));
+        transacaoViewHolder.data.setText(Utils.dateParaString(transacoes.get(i).getDataBD()));
 
         if (transacoes.get(i).getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
             transacaoViewHolder.tipoTransacao.setText("Rendimento");

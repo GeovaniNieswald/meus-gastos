@@ -1,7 +1,5 @@
 package com.geovaninieswald.meusgastos.model;
 
-import com.google.firebase.database.Exclude;
-
 public class Usuario {
 
     private String id;
@@ -12,13 +10,13 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(String nome, String imagem, String email) {
+    public Usuario(String id, String nome, String imagem, String email) {
+        this.id = id;
         this.nome = nome;
         this.imagem = imagem;
         this.email = email;
     }
 
-    @Exclude
     public String getId() {
         return id;
     }

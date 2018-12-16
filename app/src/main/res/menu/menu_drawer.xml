@@ -55,6 +55,11 @@
         <menu>
             <group android:checkableBehavior="none">
                 <item
+                    android:id="@+id/nav_sincronizar"
+                    android:icon="@drawable/ic_menu_sincronizar"
+                    android:title="Sincronizar" />
+
+                <item
                     android:id="@+id/nav_sobre"
                     android:icon="@drawable/ic_menu_sobre"
                     android:title="Sobre" />

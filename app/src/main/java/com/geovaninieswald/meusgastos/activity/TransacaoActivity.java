@@ -17,12 +17,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.geovaninieswald.meusgastos.R;
 import com.geovaninieswald.meusgastos.enumeration.TipoCategoria;
 import com.geovaninieswald.meusgastos.helper.ItemOffsetDecoration;
 import com.geovaninieswald.meusgastos.helper.RecyclerViewTransacaoAdapter;
+import com.geovaninieswald.meusgastos.helper.SharedFirebasePreferences;
 import com.geovaninieswald.meusgastos.helper.Utils;
 import com.geovaninieswald.meusgastos.model.DAO.TransacaoDAO;
 import com.geovaninieswald.meusgastos.model.Transacao;
@@ -55,6 +55,8 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
 
     private List<Transacao> transacoesList;
 
+    private SharedFirebasePreferences preferencias;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +88,8 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
         fabReceita.setOnClickListener(this);
 
         configurarRecycler();
+
+        preferencias = new SharedFirebasePreferences(TransacaoActivity.this);
     }
 
     @Override
@@ -200,9 +204,9 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
         for (Transacao t : newList) {
             if (t.isPago()) {
                 if (t.getCategoria().getTipoCategoria() == TipoCategoria.GASTO) {
-                    totalBD = totalBD.subtract(t.getValor());
+                    totalBD = totalBD.subtract(t.getValorBD());
                 } else if (t.getCategoria().getTipoCategoria() == TipoCategoria.RENDIMENTO) {
-                    totalBD = totalBD.add(t.getValor());
+                    totalBD = totalBD.add(t.getValorBD());
                 }
             }
         }
@@ -258,15 +262,18 @@ public class TransacaoActivity extends AppCompatActivity implements View.OnClick
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 TransacaoDAO dao = new TransacaoDAO(getBaseContext());
-                                int numItens = dao.excluir(adapter.getDbId(POSICAO));
+                                int id = (int) adapter.getDbId(POSICAO);
+                                int numItens = dao.excluir(id);
 
                                 if (numItens > 0) {
                                     adapter.removerTransacao(POSICAO);
                                     setAdapter("");
-                                    // Excluir do firebase
-                                    Toast.makeText(TransacaoActivity.this, "Transação Excluida", Toast.LENGTH_SHORT).show();
+
+                                    Utils.mostrarMensagemCurta(TransacaoActivity.this, "Transação Excluida");
+                                    preferencias.salvarStatusSincronia(false);
                                 } else {
-                                    Toast.makeText(TransacaoActivity.this, "Não foi possível excluir a transação", Toast.LENGTH_SHORT).show();
+                                    adapter.cancelarRemocao(POSICAO);
+                                    Utils.mostrarMensagemCurta(TransacaoActivity.this, "Não foi possível excluir a transação");
                                 }
                             }
                         })
