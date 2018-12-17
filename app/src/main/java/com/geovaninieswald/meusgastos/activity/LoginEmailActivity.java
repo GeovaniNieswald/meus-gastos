@@ -163,9 +163,9 @@ public class LoginEmailActivity extends Activity implements View.OnClickListener
                                         }
 
                                         preferencias.salvarStatusSincronia(true);
+                                        startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
                                         finishAffinity();
                                         finish();
-                                        startActivity(new Intent(LoginEmailActivity.this, MainActivity.class));
                                     }
 
                                     @Override

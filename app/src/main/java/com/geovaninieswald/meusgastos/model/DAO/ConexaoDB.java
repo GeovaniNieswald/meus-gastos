@@ -17,7 +17,8 @@ public class ConexaoDB extends SQLiteOpenHelper {
             "(id INTEGER PRIMARY KEY AUTOINCREMENT, descricao TEXT NOT NULL, tipo INT NOT NULL);";
 
     private final String CREATE_TABLE_TRANSACAO = "CREATE TABLE IF NOT EXISTS transacao " +
-            "(id INTEGER PRIMARY KEY AUTOINCREMENT, descricao TEXT NOT NULL, valor REAL NOT NULL, data TEXT NOT NULL, paga INTEGER NOT NULL, id_categoria INTEGER NOT NULL, " +
+            "(id INTEGER PRIMARY KEY AUTOINCREMENT, descricao TEXT NOT NULL, valor REAL NOT NULL, " +
+            "data TEXT NOT NULL, paga INTEGER NOT NULL, id_categoria INTEGER NOT NULL, " +
             "FOREIGN KEY (id_categoria) REFERENCES categoria (id) ON DELETE RESTRICT);";
 
     private final String DROP_TABLE_USUARIO = "DROP TABLE IF EXISTS usuario";

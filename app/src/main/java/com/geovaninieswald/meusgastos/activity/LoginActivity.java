@@ -85,8 +85,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         usuarios = new ArrayList<>();
 
         if (preferencias.verificarLogin()) {
-            finish();
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            finish();
         }
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -316,8 +316,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                             }
 
                             preferencias.salvarStatusSincronia(true);
-                            finish();
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
                         }
 
                         @Override

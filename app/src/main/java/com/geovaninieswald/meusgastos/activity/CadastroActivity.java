@@ -236,9 +236,9 @@ public class CadastroActivity extends Activity implements View.OnClickListener {
                         ConexaoFirebase.sair();
                         preferencias.sair();
                     } else {
+                        startActivity(new Intent(CadastroActivity.this, MainActivity.class));
                         finishAffinity();
                         finish();
-                        startActivity(new Intent(CadastroActivity.this, MainActivity.class));
                     }
                 } else {
                     Utils.mostrarMensagemCurta(CadastroActivity.this, "Não foi possível efetuar o cadastro");
